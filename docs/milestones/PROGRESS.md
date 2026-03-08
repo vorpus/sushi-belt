@@ -1,6 +1,6 @@
 # Sushi Belt — Progress
 
-## Current Milestone: M2 — The Living Grid (COMPLETE)
+## Current Milestone: M3 — Belts Move Items (COMPLETE)
 
 ### M1 Tasks (COMPLETE)
 - [x] 1.1: Initialize project with Vite + TypeScript
@@ -26,16 +26,16 @@
 - [x] 2.9: Tile highlight and placement preview — Done: white highlight on hover, green/red ghost for building placement
 - [x] 2.10: Update CLAUDE.md — Done: added all new key files, controls, tool modes, rendering layer order
 
-### M3 Tasks — Belts Move Items
-- [ ] 3.1: Belt grid data structure
-- [ ] 3.2: Segment graph builder
-- [ ] 3.3: Belt placement tool
-- [ ] 3.4: Belt renderer
-- [ ] 3.5: Belt system — item movement
-- [ ] 3.6: Source system → belt integration
-- [ ] 3.7: Belt item rendering
-- [ ] 3.8: Delete tool for belts and buildings
-- [ ] 3.9: Update CLAUDE.md
+### M3 Tasks — Belts Move Items (COMPLETE — 2026-03-08)
+- [x] 3.1: Belt grid data structure — Done: added getBeltTile/setBeltTile/removeBeltTile/beltKey helpers to state.ts
+- [x] 3.2: Segment graph builder — Done: rebuildSegments() walks belt grid, groups contiguous same-direction tiles into segments, links nextSegment and building I/O, 6 tests
+- [x] 3.3: Belt placement tool — Done: click-and-drag L-shaped belt paths, B key toggles belt mode, right-click deletes
+- [x] 3.4: Belt renderer — Done: gray rectangles with directional arrows, items rendered as colored circles on segments
+- [x] 3.5: Belt system — item movement — Done: topological order processing, transfer/advance algorithm, back-pressure, 4 tests
+- [x] 3.6: Source system → belt integration — Done: sources push items to connected belt segments, fallback to outputBuffer if belt full, 2 integration tests
+- [x] 3.7: Belt item rendering — Done: merged into belt renderer, items drawn at segment tile positions
+- [x] 3.8: Delete tool — Done: right-click deletes belts/buildings, X key toggles delete mode, red highlight preview
+- [x] 3.9: Update CLAUDE.md — Done: added belt system docs, new key files, updated controls and rendering layers
 
 ### M4 Tasks — Selling & Economy
 - [ ] 4.1: Seller system

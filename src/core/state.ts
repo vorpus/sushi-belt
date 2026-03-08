@@ -65,6 +65,34 @@ export interface GameState {
 // Factory
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Belt grid helpers
+// ---------------------------------------------------------------------------
+
+/** Convert a grid position to a belt grid map key. */
+export function beltKey(pos: GridPosition): string {
+  return `${pos.x},${pos.y}`;
+}
+
+/** Get the belt tile at a position, or null if none exists. */
+export function getBeltTile(state: GameState, pos: GridPosition): BeltTile | null {
+  return state.beltGrid.get(beltKey(pos)) ?? null;
+}
+
+/** Set a belt tile at a position. */
+export function setBeltTile(state: GameState, pos: GridPosition, direction: Direction): void {
+  state.beltGrid.set(beltKey(pos), { direction, segmentId: null });
+}
+
+/** Remove the belt tile at a position. Returns true if a tile was removed. */
+export function removeBeltTile(state: GameState, pos: GridPosition): boolean {
+  return state.beltGrid.delete(beltKey(pos));
+}
+
+// ---------------------------------------------------------------------------
+// Factory
+// ---------------------------------------------------------------------------
+
 /**
  * Create a fresh game state with an empty grid.
  * The top 3 rows are water; the remaining rows are land.
