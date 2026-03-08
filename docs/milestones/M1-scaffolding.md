@@ -117,3 +117,74 @@ Define the Entity interface and all component interfaces per the engineering doc
 - Configure Vitest per engineering doc (node environment, coverage for `src/systems/` and `src/core/`)
 - Write a smoke test that creates a `GameState`, runs 60 ticks, and asserts `state.tick === 60`
 - Ensure `pnpm test` passes
+
+### Task 1.9: Create CLAUDE.md
+
+**Files:** `CLAUDE.md`
+
+Create a `CLAUDE.md` file in the project root that serves as the quick-start guide for AI agents working on this codebase. This file is automatically read by Claude Code at session start and should contain everything an agent needs to be productive without reading the full engineering doc.
+
+Contents to include:
+
+#### Project overview (2-3 sentences)
+- Sushi Belt is a cozy conveyor-belt automation game built with TypeScript + PixiJS v8
+- Simulation runs headless (no rendering dependency) — core logic is fully testable without a browser
+- All game content is data-driven — adding items/recipes/buildings requires zero system code changes
+
+#### Commands
+- `pnpm dev` — start Vite dev server
+- `pnpm build` — type-check and build for production
+- `pnpm test` — run all unit and integration tests (headless, no browser)
+- `pnpm test:watch` — run tests in watch mode
+- `pnpm lint` — lint with ESLint
+- `pnpm format` — format with Prettier
+- `pnpm atlas` — regenerate texture atlas from `assets/sprites/`
+
+#### Architecture quick reference
+Map of key directories and what they contain:
+- `src/core/` — types, entity model, game state, game loop, event bus, save/load. **Start here** to understand the data model.
+- `src/data/` — all game content (items, recipes, buildings, economy, upgrades). **Edit here** to add new content — no system code changes needed.
+- `src/systems/` — simulation logic. Each system is a pure function: `(state, dt, events) => void`. Systems run in fixed order every tick.
+- `src/rendering/` — PixiJS rendering layer. Read-only access to state. Never mutates game state.
+- `src/input/` — mouse/keyboard handling, tool state, camera controls.
+- `src/debug/` — dev-only inspection and commands. Not shipped in production.
+- `tests/` — unit tests in `systems/`, integration tests in `integration/`, visual tests in `visual/`, helpers in `helpers/`.
+
+#### Key files to know
+- `src/core/types.ts` — all shared types (GridPosition, Direction, EntityId, etc.)
+- `src/core/entity.ts` — Entity interface and component interfaces
+- `src/core/state.ts` — GameState shape and factory function
+- `src/core/gameLoop.ts` — fixed-timestep game loop (60Hz)
+- `src/data/buildings.ts` — all building definitions (size, cost, components, connections)
+- `src/data/recipes.ts` — all recipe definitions (inputs, outputs, processing time)
+- `src/systems/beltSystem.ts` — segment-based belt simulation (the core of the game)
+- `src/systems/segmentBuilder.ts` — rebuilds belt segment graph when belts are placed/removed
+
+#### System execution order (per tick)
+1. `sourceSystem` — sources produce items
+2. `beltSystem` — items move along belt segments
+3. `processorSystem` — single-recipe processing (e.g., cutting board)
+4. `assemblerSystem` — multi-input assembly (e.g., nigiri press)
+5. `sellerSystem` — items sold for money
+6. `economySystem` — funds updated, unlocks checked
+7. `events.flush()` — deferred event dispatch
+
+#### Module boundary rules
+- `core/` and `data/` must never import from `systems/`, `rendering/`, `input/`, or `debug/`
+- `systems/` imports from `core/` and `data/` only
+- `rendering/` imports from `core/` and `data/` only (read-only state access)
+- This separation ensures the simulation can run headlessly in tests
+
+#### Testing conventions
+- Systems are pure functions — test by creating a minimal state, running the system, asserting state changes
+- Use `createMinimalState()` and `createEntity()` helpers from test utilities
+- Integration tests use `buildTestFactory()` to set up full production chains declaratively
+- All tests run in Node (headless) — no browser needed for unit/integration tests
+- Run `pnpm test` before pushing — all tests must pass
+
+#### How to verify changes
+- **Added/changed a system?** Run its unit test: `pnpm test -- tests/systems/<system>.test.ts`
+- **Added content (item/recipe/building)?** Run data validation: `pnpm test -- tests/data/validation.test.ts`
+- **Changed belt logic?** Run belt + integration tests: `pnpm test -- tests/systems/beltSystem.test.ts tests/integration/`
+- **Changed rendering?** Manual verification: `pnpm dev` and visually inspect in browser
+- **Any change:** `pnpm build` must succeed (type-checks the whole project)
