@@ -1,30 +1,30 @@
 # Sushi Belt — Progress
 
-## Current Milestone: M1 — Project Scaffolding & Core Types
+## Current Milestone: M2 — The Living Grid (COMPLETE)
 
-### M1 Tasks
-- [ ] 1.1: Initialize project with Vite + TypeScript
-- [ ] 1.2: Core type definitions
-- [ ] 1.3: Entity and component interfaces
-- [ ] 1.4: GameState interface and factory
-- [ ] 1.5: Event bus
-- [ ] 1.6: Game loop (headless + rendered)
-- [ ] 1.7: Entry point with PixiJS canvas
-- [ ] 1.8: Vitest configuration and smoke test
-- [ ] 1.9: Create CLAUDE.md
-- [ ] 1.10: Create PROGRESS.md
+### M1 Tasks (COMPLETE)
+- [x] 1.1: Initialize project with Vite + TypeScript
+- [x] 1.2: Core type definitions
+- [x] 1.3: Entity and component interfaces
+- [x] 1.4: GameState interface and factory
+- [x] 1.5: Event bus
+- [x] 1.6: Game loop (headless + rendered)
+- [x] 1.7: Entry point with PixiJS canvas
+- [x] 1.8: Vitest configuration and smoke test
+- [x] 1.9: Create CLAUDE.md
+- [x] 1.10: Create PROGRESS.md
 
-### M2 Tasks — The Living Grid
-- [ ] 2.1: Data layer — items and buildings (starter set)
-- [ ] 2.2: Grid renderer — terrain tiles
-- [ ] 2.3: Camera — pan and zoom
-- [ ] 2.4: Input manager — mouse tracking and tool state
-- [ ] 2.5: Building placement system
-- [ ] 2.6: Building renderer
-- [ ] 2.7: Source system — buildings produce items
-- [ ] 2.8: Item rendering (ground items)
-- [ ] 2.9: Tile highlight and placement preview
-- [ ] 2.10: Update CLAUDE.md
+### M2 Tasks — The Living Grid (COMPLETE — 2026-03-08)
+- [x] 2.1: Data layer — items and buildings (starter set) — Done: created items.ts (fish), buildings.ts (fishing_boat, fish_market), recipes.ts (empty), economy.ts (fish: 2) with `as const satisfies` pattern
+- [x] 2.2: Grid renderer — terrain tiles — Done: GridRenderer draws blue water/tan land tiles with subtle grid lines
+- [x] 2.3: Camera — pan and zoom — Done: pixi-viewport with right/middle-click drag pan, scroll zoom, clamped bounds
+- [x] 2.4: Input manager — mouse tracking and tool state — Done: InputManager with screen-to-grid conversion, tool state, left-click placement
+- [x] 2.5: Building placement system — Done: placeBuilding/removeBuilding with terrain + occupancy validation, 9 tests
+- [x] 2.6: Building renderer — Done: colored rectangles with centered name labels for each building
+- [x] 2.7: Source system — buildings produce items — Done: sourceSystem with outputBuffer, epsilon timer fix for FP precision, 4 tests
+- [x] 2.8: Item rendering (ground items) — Done: colored circles at building output connection points with stacking
+- [x] 2.9: Tile highlight and placement preview — Done: white highlight on hover, green/red ghost for building placement
+- [x] 2.10: Update CLAUDE.md — Done: added all new key files, controls, tool modes, rendering layer order
 
 ### M3 Tasks — Belts Move Items
 - [ ] 3.1: Belt grid data structure

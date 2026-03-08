@@ -21,6 +21,7 @@ export type SourceComponent = {
   produces: ItemId;
   interval: number;
   timer: number;
+  outputBuffer: ItemId[];
 };
 
 /** A processor transforms items according to a recipe. */
