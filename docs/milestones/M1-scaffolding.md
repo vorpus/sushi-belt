@@ -190,3 +190,66 @@ Map of key directories and what they contain:
 - **Any change:** `pnpm build` must succeed (type-checks the whole project)
 
 **Important:** CLAUDE.md is a living document. The final task of every subsequent milestone includes updating CLAUDE.md to reflect new files, systems, commands, or conventions introduced in that milestone. It should always be an accurate, up-to-date reference — not a historical artifact of M1.
+
+#### Development workflow
+
+Include the following section in CLAUDE.md to establish how agents iterate on this project:
+
+**Progress tracking:**
+- Milestone and task progress is tracked in `docs/milestones/PROGRESS.md`
+- When you **start** a task, mark it `[x]` in PROGRESS.md and note the date
+- When you **complete** a task, update PROGRESS.md with a short summary of what was done (e.g., "Done — added sourceSystem with tests")
+- Before starting work, always read PROGRESS.md to understand what's already been completed and what's next
+- Milestone docs live in `docs/milestones/M1-scaffolding.md` through `M10-polish.md` — read the relevant milestone doc for full task details
+
+**Stay focused — don't refactor mid-task:**
+- If you notice something suboptimal, a potential bug, a design smell, or code that should be refactored — **do not fix it now**
+- Instead, add it to the `## Backlog` section at the bottom of PROGRESS.md with a short description of what you noticed and where
+- Examples: "Belt segment rebuild is O(n²) — could use incremental rebuild (src/systems/segmentBuilder.ts)", "ProcessorComponent.progress should probably be clamped (src/systems/processorSystem.ts:45)"
+- These items will be triaged and addressed in a future task or milestone
+- The only exception: if the issue directly blocks your current task, fix it and note what you did
+
+**Scope discipline:**
+- Each task targets a small number of files (typically 1-4). Stick to the files listed in the task
+- Do not add features, refactor surrounding code, or "improve" things outside the task scope
+- If the task description is ambiguous, check the engineering doc or PRD for clarification — don't guess
+- Write tests for the code you add. Do not write tests for code you didn't change
+
+**Handoff between sessions:**
+- At the end of your session, ensure PROGRESS.md is up to date with exactly what you completed, what's in progress, and any blockers
+- If you didn't finish a task, note what remains in PROGRESS.md so the next agent can pick up seamlessly
+- Always commit and push your work before ending a session — even partial progress
+
+### Task 1.10: Create PROGRESS.md
+
+**Files:** `docs/milestones/PROGRESS.md`
+
+Create the progress tracking file that agents will use to coordinate across sessions. Structure:
+
+```markdown
+# Sushi Belt — Progress
+
+## Current Milestone: M1 — Project Scaffolding & Core Types
+
+### M1 Tasks
+- [ ] 1.1: Initialize project with Vite + TypeScript
+- [ ] 1.2: Core type definitions
+- [ ] 1.3: Entity and component interfaces
+- [ ] 1.4: GameState interface and factory
+- [ ] 1.5: Event bus
+- [ ] 1.6: Game loop (headless + rendered)
+- [ ] 1.7: Entry point with PixiJS canvas
+- [ ] 1.8: Vitest configuration and smoke test
+- [ ] 1.9: Create CLAUDE.md
+- [ ] 1.10: Create PROGRESS.md
+
+### M2 Tasks
+- [ ] 2.1 through 2.10 (listed but not started)
+
+... (all milestones listed with unchecked boxes)
+
+## Backlog
+<!-- Add items here when you notice something that needs attention but is outside your current task -->
+```
+
+Each task entry should match the task titles from the milestone docs. As tasks are completed, agents check them off and add a brief note.
