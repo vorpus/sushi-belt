@@ -34,6 +34,9 @@ const GRID_HEIGHT = 24;
   app.stage.addChild(viewport);
   viewport.addChild(renderer.root);
 
+  // 5b. Add HUD overlay directly to stage (not affected by camera)
+  app.stage.addChild(renderer.uiRenderer.container);
+
   // 6. Set up input manager
   const toolState = createToolState();
   new InputManager(viewport, state, events, toolState, renderer);

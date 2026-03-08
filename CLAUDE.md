@@ -30,7 +30,7 @@ Sushi Belt is a cozy conveyor-belt automation game built with TypeScript + PixiJ
 - `src/core/entity.ts` — Entity interface and component interfaces (SourceComponent has `outputBuffer`)
 - `src/core/state.ts` — GameState shape and factory function
 - `src/core/state.ts` — also contains belt grid helpers: `getBeltTile()`, `setBeltTile()`, `removeBeltTile()`, `beltKey()`
-- `src/core/gameLoop.ts` — fixed-timestep game loop (60Hz), runs `sourceSystem` → `beltSystem` each tick
+- `src/core/gameLoop.ts` — fixed-timestep game loop (60Hz), runs `sourceSystem` → `beltSystem` → `sellerSystem` → `economySystem` each tick
 - `src/data/items.ts` — item definitions (`ITEMS` const, `DataItemId` type)
 - `src/data/buildings.ts` — building definitions (`BUILDINGS` const, `BuildingId` type, `BuildingDefinition` interface)
 - `src/data/recipes.ts` — recipe definitions (`RECIPES` const, empty for now)
@@ -38,13 +38,16 @@ Sushi Belt is a cozy conveyor-belt automation game built with TypeScript + PixiJ
 - `src/systems/sourceSystem.ts` — source buildings produce items; pushes to connected belt segments, falls back to `outputBuffer`
 - `src/systems/beltSystem.ts` — moves items along belt segments (transfer → advance per tick), topological ordering
 - `src/systems/segmentBuilder.ts` — `rebuildSegments(state)` builds segment graph from belt grid (runs on belt placement, not per tick)
-- `src/systems/buildingPlacement.ts` — `placeBuilding()` / `removeBuilding()` with terrain + occupancy validation
+- `src/systems/sellerSystem.ts` — sells items from building inventories; checks category match and emits `itemSold` events
+- `src/systems/economySystem.ts` — `createEconomySystem()` factory; listens for `itemSold` events, updates `state.funds` and `state.stats`
+- `src/systems/buildingPlacement.ts` — `placeBuilding()` / `removeBuilding()` with terrain + occupancy validation; seller buildings auto-get inventory
 - `src/rendering/renderer.ts` — orchestrates all rendering layers
 - `src/rendering/gridRenderer.ts` — terrain tiles, grid lines, tile highlight, placement ghost
 - `src/rendering/buildingRenderer.ts` — draws buildings as colored rectangles with labels
 - `src/rendering/beltRenderer.ts` — draws belt tiles as directional arrows and items on belt segments
 - `src/rendering/spritePool.ts` — `SpritePool` class for reusable sprite objects (acquire/release/releaseAll)
 - `src/rendering/itemRenderer.ts` — draws items from entity output buffers at connection points
+- `src/rendering/uiRenderer.ts` — HUD overlay: funds display (`$XX`) and income rate (`$X/sec`), drawn on top of everything
 - `src/input/camera.ts` — pixi-viewport setup with drag-to-pan and scroll-to-zoom
 - `src/input/inputManager.ts` — mouse tracking, screen-to-grid conversion, tool actions
 - `src/input/tools.ts` — tool type union and tool state
@@ -61,11 +64,11 @@ Sushi Belt is a cozy conveyor-belt automation game built with TypeScript + PixiJ
 ## System Execution Order (per tick)
 
 1. `sourceSystem` — sources produce items, push to connected belt segments
-2. `beltSystem` — items move along belt segments (transfer → advance)
-3. `processorSystem` — single-recipe processing (e.g., cutting board)
-4. `assemblerSystem` — multi-input assembly (e.g., nigiri press)
-5. `sellerSystem` — items sold for money
-6. `economySystem` — funds updated, unlocks checked
+2. `beltSystem` — items move along belt segments (transfer → advance), delivers items to building inventories
+3. `processorSystem` — single-recipe processing (e.g., cutting board) *(placeholder)*
+4. `assemblerSystem` — multi-input assembly (e.g., nigiri press) *(placeholder)*
+5. `sellerSystem` — iterates seller+inventory entities, sells matching items, emits `itemSold` events
+6. `economySystem` — listens for `itemSold` events, updates `state.funds` and `state.stats`, emits `fundsChanged`
 7. `events.flush()` — deferred event dispatch
 
 ## Controls
@@ -86,6 +89,14 @@ Sushi Belt is a cozy conveyor-belt automation game built with TypeScript + PixiJ
 - `place_belt` — click-and-drag to draw L-shaped belt paths
 - `delete` — click to remove buildings and belts
 
+## First Playable Loop
+
+Source → Belt → Seller = Income. The event flow:
+1. `sourceSystem` produces items into belt segments
+2. `beltSystem` moves items along belts and delivers to building inventories via `outputTarget`
+3. `sellerSystem` finds items in seller inventories, removes them, emits `itemSold`
+4. `economySystem` handles `itemSold` → updates `state.funds` and `state.stats` → emits `fundsChanged`
+
 ## Rendering Layer Order
 
 1. Grid (terrain tiles + grid lines)
@@ -93,6 +104,7 @@ Sushi Belt is a cozy conveyor-belt automation game built with TypeScript + PixiJ
 3. Buildings (colored rectangles + labels)
 4. Items (colored circles at building output points — for unbuffered items)
 5. UI overlays (ghost preview, tile highlight)
+6. HUD (funds display + income rate — fixed on screen, not affected by camera)
 
 ## Module Boundary Rules
 

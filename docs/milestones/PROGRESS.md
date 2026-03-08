@@ -1,6 +1,6 @@
 # Sushi Belt — Progress
 
-## Current Milestone: M3 — Belts Move Items (COMPLETE)
+## Current Milestone: M4 — Selling & Economy (COMPLETE)
 
 ### M1 Tasks (COMPLETE)
 - [x] 1.1: Initialize project with Vite + TypeScript
@@ -37,14 +37,14 @@
 - [x] 3.8: Delete tool — Done: right-click deletes belts/buildings, X key toggles delete mode, red highlight preview
 - [x] 3.9: Update CLAUDE.md — Done: added belt system docs, new key files, updated controls and rendering layers
 
-### M4 Tasks — Selling & Economy
-- [ ] 4.1: Seller system
-- [ ] 4.2: Economy system
-- [ ] 4.3: Fish market building data
-- [ ] 4.4: Building inventory — items flow from belts into buildings
-- [ ] 4.5: HUD — funds display
-- [ ] 4.6: Integration test — first playable loop
-- [ ] 4.7: Update CLAUDE.md
+### M4 Tasks — Selling & Economy (COMPLETE — 2026-03-08)
+- [x] 4.1: Seller system — Done: sellerSystem iterates seller+inventory entities, sells items matching acceptsCategories, emits itemSold events, 3 tests
+- [x] 4.2: Economy system — Done: createEconomySystem() factory listens for itemSold events, updates state.funds and state.stats, emits fundsChanged, 3 tests
+- [x] 4.3: Fish market building data — Done: fish_market already defined in buildings.ts with seller component
+- [x] 4.4: Building inventory — items flow from belts into buildings — Done: beltSystem already transfers items to outputTarget inventory; placeBuilding now auto-creates inventory for seller buildings (maxSize: 5)
+- [x] 4.5: HUD — funds display — Done: UIRenderer shows $XX funds and $X/sec income rate, added to app.stage (camera-independent)
+- [x] 4.6: Integration test — first playable loop — Done: fishing_boat → belt → fish_market test, 600 ticks, asserts funds > 0, totalItemsSold >= 2, back-pressure test
+- [x] 4.7: Update CLAUDE.md — Done: added sellerSystem, economySystem, uiRenderer to key files, documented first playable loop event flow
 
 ### M5 Tasks — Processing & Recipes
 - [ ] 5.1: Recipe data

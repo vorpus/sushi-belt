@@ -9,6 +9,7 @@ import { GridRenderer } from './gridRenderer.ts';
 import { BeltRenderer } from './beltRenderer.ts';
 import { BuildingRenderer } from './buildingRenderer.ts';
 import { ItemRenderer } from './itemRenderer.ts';
+import { UIRenderer } from './uiRenderer.ts';
 
 export class Renderer implements IRenderer {
   readonly root = new Container();
@@ -16,14 +17,17 @@ export class Renderer implements IRenderer {
   readonly beltRenderer: BeltRenderer;
   readonly buildingRenderer: BuildingRenderer;
   readonly itemRenderer: ItemRenderer;
+  readonly uiRenderer: UIRenderer;
 
   constructor() {
     this.gridRenderer = new GridRenderer();
     this.beltRenderer = new BeltRenderer();
     this.buildingRenderer = new BuildingRenderer();
     this.itemRenderer = new ItemRenderer();
+    this.uiRenderer = new UIRenderer();
 
     // Layer order: grid → belts → buildings → items
+    // (UI is added to app.stage separately, not inside viewport)
     this.root.addChild(this.gridRenderer.container);
     this.root.addChild(this.beltRenderer.container);
     this.root.addChild(this.buildingRenderer.container);
@@ -35,5 +39,6 @@ export class Renderer implements IRenderer {
     this.beltRenderer.render(state);
     this.buildingRenderer.render(state);
     this.itemRenderer.render(state);
+    this.uiRenderer.render(state);
   }
 }
