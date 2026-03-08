@@ -70,6 +70,8 @@ export function placeBuilding(
     entity.seller = {
       acceptsCategories: [...def.components.seller.acceptsCategories],
     };
+    // Seller buildings need an inventory to receive items from belts
+    entity.inventory = { items: [], maxSize: 5 };
   }
 
   if (def.components.processor) {

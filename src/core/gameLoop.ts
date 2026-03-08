@@ -6,6 +6,8 @@ import type { GameState } from './state.ts';
 import type { EventBus } from './eventBus.ts';
 import { sourceSystem } from '../systems/sourceSystem.ts';
 import { beltSystem } from '../systems/beltSystem.ts';
+import { sellerSystem } from '../systems/sellerSystem.ts';
+import { createEconomySystem } from '../systems/economySystem.ts';
 
 export const TICK_RATE = 60;
 export const TICK_DURATION_S = 1 / TICK_RATE;
@@ -30,11 +32,13 @@ export class GameLoop {
   private state: GameState;
   private events: EventBus;
   private renderer: Renderer | null;
+  private economySystem: (state: GameState, events: EventBus) => void;
 
   constructor(options: GameLoopOptions) {
     this.state = options.state;
     this.events = options.events;
     this.renderer = options.renderer ?? null;
+    this.economySystem = createEconomySystem();
   }
 
   /** Execute a single fixed-timestep tick. */
@@ -44,8 +48,8 @@ export class GameLoop {
     // Systems to be added in later milestones:
     // processorSystem(this.state, TICK_DURATION_S, this.events);
     // assemblerSystem(this.state, TICK_DURATION_S, this.events);
-    // sellerSystem(this.state, TICK_DURATION_S, this.events);
-    // economySystem(this.state, this.events);
+    sellerSystem(this.state, TICK_DURATION_S, this.events);
+    this.economySystem(this.state, this.events);
     this.events.flush();
     this.state.tick++;
   }
