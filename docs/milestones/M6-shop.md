@@ -93,3 +93,15 @@ A shop panel where the player spends earned funds to unlock new buildings. The u
 - Run until funds >= $50 (enough for rice paddy)
 - Assert progression is working: each purchase unlocks new capability, income increases
 - This test verifies the unlock tree and economy are properly connected
+
+### Task 6.7: Update CLAUDE.md
+
+**Files:** `CLAUDE.md`
+
+Update CLAUDE.md to reflect everything introduced in this milestone:
+- Add `src/rendering/shopRenderer.ts` to key files
+- Add `src/data/upgrades.ts` to key files
+- Document the unlock/purchase system: `purchaseUnlock()` and `purchaseUpgrade()` in `economySystem`
+- Note that building placement now checks `state.unlocks` — locked buildings can't be placed
+- Document starting state: player starts with $0 funds and only fishing_boat + fish_market unlocked
+- Add keyboard shortcuts for building selection (1-9, Tab) to Controls section

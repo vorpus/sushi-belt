@@ -146,3 +146,17 @@ The game has all shop upgrades (belt speed, bulk cutting, fast cooker, etc.), a 
   - Verify no items are permanently stuck anywhere
   - Verify funds are monotonically increasing (economy isn't broken)
 - This is the "does the whole game work?" test
+
+### Task 10.11: Final CLAUDE.md update
+
+**Files:** `CLAUDE.md`
+
+Final comprehensive update to CLAUDE.md now that the game is feature-complete:
+- Add `src/debug/inspect.ts` and `src/debug/commands.ts` to key files
+- Document the state inspection API: `inspectState()` returns an `InspectionReport`, `dumpGrid()` returns ASCII representation
+- Document dev commands available on `window.sushi` in dev builds: `setFunds`, `unlockAll`, `spawnItem`, `fastForward`, `getState`, `inspectSegment`, `measureThroughput`
+- Document the debug overlay (F3 toggle): grid coords, segment IDs, throughput, building state, entity inspector
+- Document all shop upgrades and their effects (belt speed, bulk cutting, fast cooker, etc.)
+- Add `scripts/pack-atlas.mjs` to key files and document the texture atlas pipeline
+- Add performance budget targets: tick < 4ms, render < 8ms, total < 16ms
+- Do a final review pass: remove any stale references, ensure every file mentioned actually exists, verify all commands work

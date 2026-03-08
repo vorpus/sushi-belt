@@ -106,3 +106,15 @@ Rice paddy and rice cooker work as a second production line. The nigiri press co
   - `state.funds >= 30` (at least 2 nigiri × $15)
   - Both production lines are flowing (fish cuts AND sushi rice being consumed)
   - No items permanently stuck in any building
+
+### Task 7.8: Update CLAUDE.md
+
+**Files:** `CLAUDE.md`
+
+Update CLAUDE.md to reflect everything introduced in this milestone:
+- Add `src/systems/assemblerSystem.ts` to key files
+- Update system execution order to show `assemblerSystem` as active (runs between `processorSystem` and `sellerSystem`)
+- Document the assembler vs processor distinction: assemblers accept multiple input types into named slots, processors accept one input type
+- Note that assembler input routing is item-type-based (items auto-route to the correct slot)
+- Document the rice production chain as a second parallel line
+- Note that all systems in the game loop are now active and running

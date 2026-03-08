@@ -114,3 +114,16 @@ A visible grid with water and land terrain, camera pan/zoom, the ability to plac
 - When in building placement mode, show a ghost preview of the building footprint
 - Color the ghost green if placement is valid, red if invalid (wrong terrain, occupied)
 - On left-click, call `placeBuilding()` if valid
+
+### Task 2.10: Update CLAUDE.md
+
+**Files:** `CLAUDE.md`
+
+Update CLAUDE.md to reflect everything introduced in this milestone:
+- Add `src/rendering/renderer.ts`, `gridRenderer.ts`, `buildingRenderer.ts`, `itemRenderer.ts` to key files
+- Add `src/input/camera.ts`, `inputManager.ts`, `tools.ts` to key files
+- Add `src/systems/buildingPlacement.ts` and `sourceSystem.ts` to key files
+- Document the tool modes (select, place_building, place_belt, delete) and how they work
+- Document the rendering layer order (grid → belts → buildings → items → UI)
+- Note that `sourceSystem` is now wired into the game loop as the first system
+- Add keyboard shortcuts (B for belt tool, etc.) to a "Controls" section

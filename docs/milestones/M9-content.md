@@ -112,3 +112,14 @@ All items, recipes, buildings, and the complete unlock tree from the PRD are pla
 - Fast-forward through ticks as needed (don't run real-time)
 - Assert each milestone of the progression produces expected income improvements
 - This is the "full game test" — if this passes, the core game loop works end-to-end
+
+### Task 9.9: Update CLAUDE.md
+
+**Files:** `CLAUDE.md`
+
+Update CLAUDE.md to reflect everything introduced in this milestone:
+- Add `src/core/save.ts` to key files — document serialize/deserialize and auto-save behavior
+- Document save/load: auto-saves to localStorage every 60 seconds, key `'sushi-belt-save'`
+- Add the data validation test to the "How to verify changes" section: `pnpm test -- tests/data/validation.test.ts` validates all items, recipes, buildings, and sell prices are consistent
+- List all available items, recipes, and buildings now that the full content set is in place (or point to `src/data/` as the source of truth)
+- Note the complete unlock tree order and costs

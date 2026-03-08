@@ -92,3 +92,15 @@ Fish flow from a fishing boat, along belts, into a fish market that sells them f
   - `state.stats.totalItemsSold >= 2` (at least 2 fish sold in 10 seconds with 3s production interval)
   - Fish market inventory is cycling (items come in and get sold)
   - Belt segments have correct topology (source → belt → market)
+
+### Task 4.7: Update CLAUDE.md
+
+**Files:** `CLAUDE.md`
+
+Update CLAUDE.md to reflect everything introduced in this milestone:
+- Add `src/systems/sellerSystem.ts` and `src/systems/economySystem.ts` to key files
+- Add `src/rendering/uiRenderer.ts` to key files
+- Update the system execution order to show `sellerSystem` and `economySystem` as active
+- Document the first playable loop: source → belt → seller = income
+- Add `tests/helpers/testFactory.ts` (with `buildTestFactory()`) to key files — this is essential for writing integration tests
+- Note the event flow: `sellerSystem` emits `itemSold`, `economySystem` handles it to update funds

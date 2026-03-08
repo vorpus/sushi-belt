@@ -87,3 +87,14 @@ The cutting board transforms fish into fish cuts. The player can build a product
   - `state.funds >= 10` (at least one complete cycle: fish → 2 cuts × $5 = $10)
   - No fish_cut items stuck indefinitely in the cutting board
   - Raw fish are consumed, not sold directly (they go through the cutter)
+
+### Task 5.7: Update CLAUDE.md
+
+**Files:** `CLAUDE.md`
+
+Update CLAUDE.md to reflect everything introduced in this milestone:
+- Add `src/systems/processorSystem.ts` to key files
+- Update system execution order to show `processorSystem` as active (runs between `beltSystem` and `sellerSystem`)
+- Document the processor state machine: IDLE → PROCESSING → BLOCKED
+- Note that recipes are data-driven — adding a new processor means adding an entry to `data/recipes.ts` and `data/buildings.ts`, zero system code changes
+- Document how building I/O works: belts deliver items into building inventory, processors consume from inventory and push outputs back onto belts

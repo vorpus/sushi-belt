@@ -115,3 +115,15 @@ Splitters, mergers, and tunnels are functional. The player can build complex bel
 - Run 3600 ticks
 - Assert all pathways are functional: fish sold, fish cuts sold, nigiri sold
 - Assert throughput is roughly balanced between splitter outputs
+
+### Task 8.9: Update CLAUDE.md
+
+**Files:** `CLAUDE.md`
+
+Update CLAUDE.md to reflect everything introduced in this milestone:
+- Document splitter, merger, and tunnel components and their behavior
+- Note splitter modes: round-robin (default) and filter
+- Note merger behavior: alternating pull, falls back to first-come-first-served
+- Note tunnel behavior: entrance/exit pairs, items teleport between them
+- Document how the segment builder handles these special entities (they create segment break points)
+- Add any new keyboard shortcuts or tool modes for placing splitters/mergers/tunnels

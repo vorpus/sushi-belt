@@ -121,3 +121,15 @@ Implement the core tick algorithm per engineering doc:
 - Right-click on a building: remove it via `removeBuilding()`, rebuild segments
 - Items on deleted belt segments are destroyed (they just disappear — no penalty per PRD)
 - Add visual feedback: highlight in red on hover when delete would apply
+
+### Task 3.9: Update CLAUDE.md
+
+**Files:** `CLAUDE.md`
+
+Update CLAUDE.md to reflect everything introduced in this milestone:
+- Add `src/systems/beltSystem.ts` and `src/systems/segmentBuilder.ts` to key files with descriptions
+- Add `src/rendering/beltRenderer.ts` and `src/rendering/spritePool.ts` to key files
+- Document the belt simulation model: segment-based, not per-item; `rebuildSegments()` runs on belt placement, not per tick
+- Note that `beltSystem` is now wired into the game loop (runs after `sourceSystem`)
+- Update the system execution order to show `sourceSystem → beltSystem` as active
+- Document how belt placement works (click-drag for L-shaped paths, right-click to delete)

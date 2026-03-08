@@ -188,3 +188,5 @@ Map of key directories and what they contain:
 - **Changed belt logic?** Run belt + integration tests: `pnpm test -- tests/systems/beltSystem.test.ts tests/integration/`
 - **Changed rendering?** Manual verification: `pnpm dev` and visually inspect in browser
 - **Any change:** `pnpm build` must succeed (type-checks the whole project)
+
+**Important:** CLAUDE.md is a living document. The final task of every subsequent milestone includes updating CLAUDE.md to reflect new files, systems, commands, or conventions introduced in that milestone. It should always be an accurate, up-to-date reference — not a historical artifact of M1.
