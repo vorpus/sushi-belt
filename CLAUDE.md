@@ -29,25 +29,39 @@ Sushi Belt is a cozy conveyor-belt automation game built with TypeScript + PixiJ
 - `src/core/types.ts` — all shared types (GridPosition, Direction, EntityId, etc.)
 - `src/core/entity.ts` — Entity interface and component interfaces (SourceComponent has `outputBuffer`)
 - `src/core/state.ts` — GameState shape and factory function
-- `src/core/gameLoop.ts` — fixed-timestep game loop (60Hz), runs `sourceSystem` each tick
+- `src/core/state.ts` — also contains belt grid helpers: `getBeltTile()`, `setBeltTile()`, `removeBeltTile()`, `beltKey()`
+- `src/core/gameLoop.ts` — fixed-timestep game loop (60Hz), runs `sourceSystem` → `beltSystem` each tick
 - `src/data/items.ts` — item definitions (`ITEMS` const, `DataItemId` type)
 - `src/data/buildings.ts` — building definitions (`BUILDINGS` const, `BuildingId` type, `BuildingDefinition` interface)
 - `src/data/recipes.ts` — recipe definitions (`RECIPES` const, empty for now)
 - `src/data/economy.ts` — sell prices (`SELL_PRICES`)
-- `src/systems/sourceSystem.ts` — source buildings produce items into `outputBuffer`
+- `src/systems/sourceSystem.ts` — source buildings produce items; pushes to connected belt segments, falls back to `outputBuffer`
+- `src/systems/beltSystem.ts` — moves items along belt segments (transfer → advance per tick), topological ordering
+- `src/systems/segmentBuilder.ts` — `rebuildSegments(state)` builds segment graph from belt grid (runs on belt placement, not per tick)
 - `src/systems/buildingPlacement.ts` — `placeBuilding()` / `removeBuilding()` with terrain + occupancy validation
 - `src/rendering/renderer.ts` — orchestrates all rendering layers
 - `src/rendering/gridRenderer.ts` — terrain tiles, grid lines, tile highlight, placement ghost
 - `src/rendering/buildingRenderer.ts` — draws buildings as colored rectangles with labels
+- `src/rendering/beltRenderer.ts` — draws belt tiles as directional arrows and items on belt segments
+- `src/rendering/spritePool.ts` — `SpritePool` class for reusable sprite objects (acquire/release/releaseAll)
 - `src/rendering/itemRenderer.ts` — draws items from entity output buffers at connection points
 - `src/input/camera.ts` — pixi-viewport setup with drag-to-pan and scroll-to-zoom
 - `src/input/inputManager.ts` — mouse tracking, screen-to-grid conversion, tool actions
 - `src/input/tools.ts` — tool type union and tool state
 
+## Belt Simulation Model
+
+- Segment-based simulation (not per-item): contiguous same-direction belt tiles form a `BeltSegment`
+- `rebuildSegments(state)` runs on belt placement/removal, NOT per tick — the tick just walks the pre-built graph
+- Each segment has an ordered item queue; items advance by `speed × dt` each tick
+- Transfer: front item reaching segment end pushes to `nextSegment` or `outputTarget` building
+- Back-pressure: if output is blocked, items compress (gap clamped to 0) but don't overlap
+- Segments process in topological order (sources first, sinks last)
+
 ## System Execution Order (per tick)
 
-1. `sourceSystem` — sources produce items
-2. `beltSystem` — items move along belt segments
+1. `sourceSystem` — sources produce items, push to connected belt segments
+2. `beltSystem` — items move along belt segments (transfer → advance)
 3. `processorSystem` — single-recipe processing (e.g., cutting board)
 4. `assemblerSystem` — multi-input assembly (e.g., nigiri press)
 5. `sellerSystem` — items sold for money
@@ -56,23 +70,29 @@ Sushi Belt is a cozy conveyor-belt automation game built with TypeScript + PixiJ
 
 ## Controls
 
-- **Left-click** — place building (when in `place_building` tool mode)
+- **Left-click** — place building or start belt drag (depending on tool mode)
+- **Left-click drag** — draw L-shaped belt path (in `place_belt` mode: horizontal first, then vertical)
+- **Right-click** — delete belt tile or building under cursor
 - **Right-click / middle-click drag** — pan camera
 - **Scroll wheel** — zoom in/out
+- **B key** — toggle between building and belt placement tools
+- **X key** — toggle delete tool
+- **Escape** — return to select mode
 
 ## Tool Modes
 
 - `select` — default selection tool
 - `place_building` — place a building on the grid (default on startup, with `fishing_boat` selected)
-- `place_belt` — place belt segments (not yet implemented)
-- `delete` — remove buildings and belts (not yet implemented)
+- `place_belt` — click-and-drag to draw L-shaped belt paths
+- `delete` — click to remove buildings and belts
 
 ## Rendering Layer Order
 
 1. Grid (terrain tiles + grid lines)
-2. Buildings (colored rectangles + labels)
-3. Items (colored circles at building output points)
-4. UI overlays (ghost preview, tile highlight)
+2. Belts (gray rectangles with directional arrows + items as colored circles)
+3. Buildings (colored rectangles + labels)
+4. Items (colored circles at building output points — for unbuffered items)
+5. UI overlays (ghost preview, tile highlight)
 
 ## Module Boundary Rules
 
