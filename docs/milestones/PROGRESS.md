@@ -1,6 +1,6 @@
 # Sushi Belt — Progress
 
-## Current Milestone: M4 — Selling & Economy (COMPLETE)
+## Current Milestone: M5 — Processing & Recipes (COMPLETE)
 
 ### M1 Tasks (COMPLETE)
 - [x] 1.1: Initialize project with Vite + TypeScript
@@ -46,14 +46,14 @@
 - [x] 4.6: Integration test — first playable loop — Done: fishing_boat → belt → fish_market test, 600 ticks, asserts funds > 0, totalItemsSold >= 2, back-pressure test
 - [x] 4.7: Update CLAUDE.md — Done: added sellerSystem, economySystem, uiRenderer to key files, documented first playable loop event flow
 
-### M5 Tasks — Processing & Recipes
-- [ ] 5.1: Recipe data
-- [ ] 5.2: Cutting board building data
-- [ ] 5.3: Processor system
-- [ ] 5.4: Building I/O — input from belt, output to belt
-- [ ] 5.5: Processing progress rendering
-- [ ] 5.6: Integration test — processing chain
-- [ ] 5.7: Update CLAUDE.md
+### M5 Tasks — Processing & Recipes (COMPLETE — 2026-03-14)
+- [x] 5.1: Recipe data — Done: added fish_cut item (processed, $5), cut_fish recipe (1 fish → 2 fish_cuts, 2s processing)
+- [x] 5.2: Cutting board building data — Done: 1x1 land, cost $25, input west, output east, processor component
+- [x] 5.3: Processor system — Done: IDLE→PROCESSING→output state machine, consumes inputs from inventory, produces to outputBuffer, pushes to belt, 5 tests
+- [x] 5.4: Building I/O — input from belt, output to belt — Done: processor buildings get inventory (input) + source outputBuffer (output), belt system delivers items, processor pushes outputs to connected belt
+- [x] 5.5: Processing progress rendering — Done: green progress bar on processor buildings during processing, cutting board color (brown)
+- [x] 5.6: Integration test — processing chain — Done: fishing_boat → belt → cutting_board → belt → fish_market test (1800 ticks), buffered output test
+- [x] 5.7: Update CLAUDE.md — Done: added processorSystem, recipes, fish_cut item, cutting_board building
 
 ### M6 Tasks — Shop & Unlocks
 - [ ] 6.1: Unlock and upgrade data

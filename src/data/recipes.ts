@@ -13,4 +13,14 @@ export interface RecipeDefinition {
   building: string;
 }
 
-export const RECIPES = {} as const satisfies Record<string, RecipeDefinition>;
+export const RECIPES = {
+  cut_fish: {
+    id: 'cut_fish',
+    inputs: [{ item: 'fish', count: 1 }],
+    outputs: [{ item: 'fish_cut', count: 2 }],
+    processingTime: 2.0,
+    building: 'cutting_board',
+  },
+} as const satisfies Record<string, RecipeDefinition>;
+
+export type RecipeId = keyof typeof RECIPES;

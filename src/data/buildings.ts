@@ -55,6 +55,20 @@ export const BUILDINGS = {
     unlockCost: 0,
     sprite: 'building_fish_market',
   },
+  cutting_board: {
+    id: 'cutting_board',
+    name: 'Cutting Board',
+    size: { w: 1, h: 1 },
+    cost: 25,
+    terrain: 'land',
+    components: { processor: { recipeId: 'cut_fish' } },
+    connectionPoints: {
+      inputs: [{ side: 'west', offset: 0 }],
+      outputs: [{ side: 'east', offset: 0 }],
+    },
+    unlockCost: 0,
+    sprite: 'building_cutting_board',
+  },
 } as const satisfies Record<string, BuildingDefinition>;
 
 export type BuildingId = keyof typeof BUILDINGS;

@@ -6,6 +6,7 @@ import type { GameState } from './state.ts';
 import type { EventBus } from './eventBus.ts';
 import { sourceSystem } from '../systems/sourceSystem.ts';
 import { beltSystem } from '../systems/beltSystem.ts';
+import { processorSystem } from '../systems/processorSystem.ts';
 import { sellerSystem } from '../systems/sellerSystem.ts';
 import { createEconomySystem } from '../systems/economySystem.ts';
 
@@ -45,8 +46,7 @@ export class GameLoop {
   tick(): void {
     sourceSystem(this.state, TICK_DURATION_S, this.events);
     beltSystem(this.state, TICK_DURATION_S, this.events);
-    // Systems to be added in later milestones:
-    // processorSystem(this.state, TICK_DURATION_S, this.events);
+    processorSystem(this.state, TICK_DURATION_S, this.events);
     // assemblerSystem(this.state, TICK_DURATION_S, this.events);
     sellerSystem(this.state, TICK_DURATION_S, this.events);
     this.economySystem(this.state, this.events);

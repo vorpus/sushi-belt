@@ -80,6 +80,14 @@ export function placeBuilding(
       progress: 0,
       processing: false,
     };
+    // Processor buildings need an inventory (input) and source-like outputBuffer
+    entity.inventory = { items: [], maxSize: 5 };
+    entity.source = {
+      produces: '' as ItemId, // not used for processors — outputBuffer is managed by processorSystem
+      interval: Infinity,
+      timer: Infinity,
+      outputBuffer: [],
+    };
   }
 
   // Set up connection points

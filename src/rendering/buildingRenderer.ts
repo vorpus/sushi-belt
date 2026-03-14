@@ -5,11 +5,13 @@
 import { Container, Graphics, Text } from 'pixi.js';
 import type { GameState } from '../core/state.ts';
 import { BUILDINGS, type BuildingId } from '../data/buildings.ts';
+import { RECIPES } from '../data/recipes.ts';
 import { TILE_SIZE } from './gridRenderer.ts';
 
 const BUILDING_COLORS: Record<string, number> = {
   fishing_boat: 0x2255aa,
   fish_market: 0xe87f22,
+  cutting_board: 0x8b6914,
 };
 
 export class BuildingRenderer {
@@ -58,6 +60,26 @@ export class BuildingRenderer {
       label.x = px + pw / 2;
       label.y = py + ph / 2;
       this.labels.addChild(label);
+
+      // Draw processing progress bar for processor buildings
+      if (entity.processor && entity.processor.processing) {
+        const recipe = RECIPES[entity.processor.recipeId as keyof typeof RECIPES];
+        if (recipe) {
+          const progress = Math.min(entity.processor.progress / recipe.processingTime, 1);
+          const barWidth = pw - inset * 4;
+          const barHeight = 4;
+          const barX = px + inset * 2;
+          const barY = py + ph - inset - barHeight - 2;
+
+          // Background
+          this.graphics.rect(barX, barY, barWidth, barHeight);
+          this.graphics.fill({ color: 0x000000, alpha: 0.4 });
+
+          // Fill
+          this.graphics.rect(barX, barY, barWidth * progress, barHeight);
+          this.graphics.fill({ color: 0x44ff44, alpha: 0.8 });
+        }
+      }
     }
   }
 }
