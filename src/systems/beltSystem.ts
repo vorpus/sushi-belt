@@ -4,7 +4,7 @@
 
 import type { GameState, BeltSegment } from '../core/state.ts';
 import type { EventBus } from '../core/eventBus.ts';
-import type { ItemId, SegmentId } from '../core/types.ts';
+import type { SegmentId } from '../core/types.ts';
 
 /**
  * Get segments in topological order (sources first, sinks last).
@@ -54,6 +54,26 @@ function getTopologicalOrder(state: GameState): BeltSegment[] {
 }
 
 /**
+ * Check if there is space to add an item at the tail (entry end) of a segment.
+ * Returns the distance the new item should have, or -1 if no space.
+ */
+function tailEntryDistance(segment: BeltSegment): number {
+  const segLength = segment.tiles.length;
+  if (segment.items.length === 0) return segLength - 1;
+
+  // Sum all gaps to find where the last item sits relative to the start
+  let totalDist = 0;
+  for (const item of segment.items) {
+    totalDist += item.distanceToNext;
+  }
+  // The last item is at position (segLength - 1 - totalDist) from the start.
+  // A new item needs at least 1 tile gap behind it, OR the segment needs to
+  // have room for at least one more item.
+  const space = segLength - 1 - totalDist;
+  return space >= 1 ? space : -1;
+}
+
+/**
  * Belt system tick: process all segments, transfer and advance items.
  */
 export function beltSystem(
@@ -69,54 +89,46 @@ export function beltSystem(
       const frontItem = segment.items[0];
       if (frontItem.distanceToNext <= 0) {
         let transferred = false;
+        // Leftover distance past the segment end (how far past 0 the item went)
+        const overshoot = -frontItem.distanceToNext;
 
         // Try push to outputTarget building
         if (segment.outputTarget) {
           const entity = state.entities.get(segment.outputTarget);
           if (entity?.inventory && entity.inventory.items.length < entity.inventory.maxSize) {
             entity.inventory.items.push(frontItem.itemId);
+            segment.items.shift();
             transferred = true;
           }
         }
 
-        // Try push to nextSegment
+        // Try push to nextSegment — reuse the same object for visual smoothing
         if (!transferred && segment.nextSegment) {
           const nextSeg = state.segments.get(segment.nextSegment);
           if (nextSeg) {
-            // Check if there's space at the tail of the next segment
             const nextSegLength = nextSeg.tiles.length;
+            let canEnter = false;
+            let entryDist = 0;
+
             if (nextSeg.items.length === 0) {
-              // Empty segment — place item at the tail (full distance to end)
-              nextSeg.items.push({
-                itemId: frontItem.itemId,
-                distanceToNext: nextSegLength - 1,
-              });
-              transferred = true;
+              // Empty segment — always accept
+              canEnter = true;
+              entryDist = Math.max(0, nextSegLength - 1 - overshoot);
             } else {
-              // Calculate how much space there is behind the last item
-              let totalDist = 0;
-              for (const item of nextSeg.items) {
-                totalDist += item.distanceToNext;
-              }
-              const spaceAtTail = nextSegLength - 1 - totalDist;
-              if (spaceAtTail >= 1) {
-                nextSeg.items.push({
-                  itemId: frontItem.itemId,
-                  distanceToNext: spaceAtTail,
-                } as { itemId: ItemId; distanceToNext: number });
-                transferred = true;
+              const dist = tailEntryDistance(nextSeg);
+              if (dist >= 0) {
+                canEnter = true;
+                entryDist = Math.max(0, dist - overshoot);
               }
             }
-          }
-        }
 
-        if (transferred) {
-          segment.items.shift();
-          // Adjust the next item's gap — it now becomes the new front
-          if (segment.items.length > 0) {
-            // The next item's distanceToNext was the gap to the old front item.
-            // Now it becomes the distance to the segment end.
-            // No adjustment needed — the gap is already relative.
+            if (canEnter) {
+              // Reuse the same BeltItem object (preserves renderer WeakMap reference)
+              frontItem.distanceToNext = entryDist;
+              segment.items.shift();
+              nextSeg.items.push(frontItem);
+              transferred = true;
+            }
           }
         }
       }
@@ -128,12 +140,7 @@ export function beltSystem(
       item.distanceToNext = Math.max(0, item.distanceToNext - advance);
     }
 
-    // Prevent overlapping: items behind a stopped item can't pass it
-    for (let i = 1; i < segment.items.length; i++) {
-      // If the item ahead is stopped (distanceToNext = 0), this item also stops
-      // Actually, distanceToNext represents gap to the next item (or end).
-      // Items compress but don't overlap, so minimum gap is 0.
-      // This is already handled by clamping to 0 above.
-    }
+    // 3. BACK-PRESSURE: items behind a stopped item compress but don't overlap
+    // distanceToNext represents gap to next item (or end), clamped to 0 above
   }
 }

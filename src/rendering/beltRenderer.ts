@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 
 import { Container, Graphics } from 'pixi.js';
-import type { GameState, BeltSegment } from '../core/state.ts';
+import type { GameState, BeltSegment, BeltItem } from '../core/state.ts';
 import type { Direction } from '../core/types.ts';
 import { TILE_SIZE } from './gridRenderer.ts';
 
@@ -20,10 +20,16 @@ const ITEM_COLORS: Record<string, number> = {
 
 const ITEM_RADIUS = 5;
 
+/** How fast the visual position chases the simulation position (0–1, higher = snappier). */
+const SMOOTH_FACTOR = 0.35;
+
 export class BeltRenderer {
   readonly container = new Container();
   private beltGraphics = new Graphics();
   private itemGraphics = new Graphics();
+
+  /** Smoothed visual positions for belt items, keyed by object reference. */
+  private smoothPositions = new WeakMap<BeltItem, { x: number; y: number }>();
 
   constructor() {
     this.container.addChild(this.beltGraphics);
@@ -99,30 +105,81 @@ export class BeltRenderer {
     this.beltGraphics.stroke();
   }
 
+  /** Compute the target pixel position of an item within a segment. */
+  private getItemTargetPos(
+    segment: BeltSegment,
+    distFromEnd: number,
+  ): { px: number; py: number } {
+    const tileIndex = segment.tiles.length - 1 - distFromEnd;
+    const clampedIndex = Math.max(0, Math.min(tileIndex, segment.tiles.length - 1));
+    const floorIdx = Math.floor(clampedIndex);
+    const ceilIdx = Math.min(floorIdx + 1, segment.tiles.length - 1);
+    const frac = clampedIndex - floorIdx;
+
+    const tileA = segment.tiles[floorIdx];
+    const tileB = segment.tiles[ceilIdx];
+
+    return {
+      px: (tileA.x + (tileB.x - tileA.x) * frac) * TILE_SIZE + TILE_SIZE / 2,
+      py: (tileA.y + (tileB.y - tileA.y) * frac) * TILE_SIZE + TILE_SIZE / 2,
+    };
+  }
+
   private drawSegmentItems(segment: BeltSegment): void {
     if (segment.items.length === 0 || segment.tiles.length === 0) return;
 
-    // Items are ordered front-to-back.
-    // Front item (index 0) has distanceToNext = distance to segment end.
-    // We walk items from front to back, accumulating distance from the end.
+    // First pass: compute smoothed positions for all items
+    const positions: { px: number; py: number }[] = [];
     let distFromEnd = 0;
 
     for (const item of segment.items) {
       distFromEnd += item.distanceToNext;
+      const target = this.getItemTargetPos(segment, distFromEnd);
 
-      // Convert distance to tile index (from end)
-      // distFromEnd=0 → last tile, distFromEnd=tiles.length-1 → first tile
-      const tileIndexFromEnd = distFromEnd;
-      const tileIndex = segment.tiles.length - 1 - tileIndexFromEnd;
+      // Smooth toward target position
+      const prev = this.smoothPositions.get(item);
+      let px: number, py: number;
+      if (prev) {
+        px = prev.x + (target.px - prev.x) * SMOOTH_FACTOR;
+        py = prev.y + (target.py - prev.y) * SMOOTH_FACTOR;
+      } else {
+        px = target.px;
+        py = target.py;
+      }
+      this.smoothPositions.set(item, { x: px, y: py });
 
-      // Interpolate position
-      const floorIdx = Math.max(0, Math.min(Math.floor(tileIndex), segment.tiles.length - 1));
-      const tile = segment.tiles[floorIdx];
+      positions.push({ px, py });
+    }
 
-      const px = tile.x * TILE_SIZE + TILE_SIZE / 2;
-      const py = tile.y * TILE_SIZE + TILE_SIZE / 2;
+    // Perpendicular offset direction for piling up bunched items
+    const perpX = segment.direction === 'north' || segment.direction === 'south' ? 1 : 0;
+    const perpY = segment.direction === 'east' || segment.direction === 'west' ? 1 : 0;
 
-      const color = ITEM_COLORS[item.itemId] ?? 0xcccccc;
+    // Second pass: detect bunched items and offset them perpendicular to belt
+    // Draw back-to-front so front items render on top
+    for (let i = segment.items.length - 1; i >= 0; i--) {
+      let { px, py } = positions[i];
+
+      // Count how many items ahead share roughly the same position (bunched)
+      let bunchIndex = 0;
+      for (let j = i - 1; j >= 0; j--) {
+        const dx = Math.abs(positions[j].px - positions[i].px);
+        const dy = Math.abs(positions[j].py - positions[i].py);
+        if (dx < ITEM_RADIUS * 2 && dy < ITEM_RADIUS * 2) {
+          bunchIndex++;
+        } else {
+          break;
+        }
+      }
+
+      // Fan out bunched items perpendicular to belt direction
+      if (bunchIndex > 0) {
+        const spread = (bunchIndex - (bunchIndex + 1) / 2) * ITEM_RADIUS * 1.4;
+        px += perpX * spread;
+        py += perpY * spread;
+      }
+
+      const color = ITEM_COLORS[segment.items[i].itemId] ?? 0xcccccc;
       this.itemGraphics.circle(px, py, ITEM_RADIUS);
       this.itemGraphics.fill(color);
       this.itemGraphics.setStrokeStyle({ width: 1, color: 0x000000, alpha: 0.3 });
