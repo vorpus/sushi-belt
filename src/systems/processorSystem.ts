@@ -99,14 +99,25 @@ export function processorSystem(
       // PROCESSING: advance progress
       entity.processor.progress += dt;
 
-      if (entity.processor.progress >= recipe.processingTime) {
+      // Apply upgrade: fast cooker (50% faster rice cooker)
+      let effectiveTime = recipe.processingTime;
+      if (recipe.id === 'cook_rice' && (state.upgrades['fast_cooker'] ?? 0) > 0) {
+        effectiveTime *= 0.5;
+      }
+
+      if (entity.processor.progress >= effectiveTime) {
         // Processing complete — produce outputs into outputBuffer
         entity.processor.processing = false;
         entity.processor.progress = 0;
 
         if (entity.source) {
           for (const output of recipe.outputs) {
-            for (let i = 0; i < output.count; i++) {
+            // Apply upgrade: bulk cutting (3 fish cuts instead of 2)
+            let count: number = output.count;
+            if (recipe.id === 'cut_fish' && output.item === 'fish_cut' && (state.upgrades['bulk_cutting'] ?? 0) > 0) {
+              count = 3;
+            }
+            for (let i = 0; i < count; i++) {
               entity.source.outputBuffer.push(output.item as ItemId);
             }
           }

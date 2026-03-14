@@ -11,6 +11,7 @@ import { Toolbar } from './input/toolbar';
 import { Shop } from './input/shop';
 import { createDemoState } from './debug/demoFactory';
 import { createEconomySystem } from './systems/economySystem';
+import { createDevCommands } from './debug/commands';
 
 const GRID_WIDTH = 32;
 const GRID_HEIGHT = 24;
@@ -104,4 +105,9 @@ const GRID_HEIGHT = 24;
   window.addEventListener('keydown', (e) => {
     if (e.key === 'F9') activateDemo();
   });
+
+  // 9. Dev tools (available in dev builds via browser console: window.sushi)
+  if (import.meta.env.DEV) {
+    (window as any).sushi = createDevCommands(() => state, () => gameLoop);
+  }
 })();

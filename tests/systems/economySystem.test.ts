@@ -143,12 +143,12 @@ describe('economySystem', () => {
     it('succeeds and increments level', () => {
       const state = createInitialState(10, 10);
       const events = new EventBus();
-      state.funds = 100;
+      state.funds = 200;
 
       const result = purchaseUpgrade(state, 'belt_speed', events);
 
       expect(result).toBe(true);
-      expect(state.funds).toBe(50);
+      expect(state.funds).toBe(100);
       expect(state.upgrades['belt_speed']).toBe(1);
     });
 

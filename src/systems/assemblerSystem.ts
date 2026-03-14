@@ -107,7 +107,13 @@ export function assemblerSystem(
       // ASSEMBLING: advance progress
       entity.assembler.progress += dt;
 
-      if (entity.assembler.progress >= recipe.processingTime) {
+      // Apply upgrade: efficient assembly (30% faster)
+      let effectiveTime = recipe.processingTime;
+      if ((state.upgrades['efficient_assembly'] ?? 0) > 0) {
+        effectiveTime *= 0.7;
+      }
+
+      if (entity.assembler.progress >= effectiveTime) {
         // Complete — produce outputs
         entity.assembler.processing = false;
         entity.assembler.progress = 0;
