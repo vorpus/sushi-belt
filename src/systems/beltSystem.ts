@@ -258,8 +258,10 @@ export function beltSystem(
     }
 
     // 2. ADVANCE: for each item (front to back), reduce distanceToNext
+    const speedLevel = state.upgrades['belt_speed'] ?? 0;
+    const speedMultiplier = 1 + speedLevel * 0.25; // +25% per level
     for (const item of segment.items) {
-      const advance = segment.speed * dt;
+      const advance = segment.speed * speedMultiplier * dt;
       item.distanceToNext = Math.max(0, item.distanceToNext - advance);
     }
   }
