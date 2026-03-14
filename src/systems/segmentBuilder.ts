@@ -254,7 +254,10 @@ export function rebuildSegments(state: GameState): void {
     };
     const nextBeltTile = state.beltGrid.get(beltKey(nextPos));
     if (nextBeltTile && nextBeltTile.segmentId) {
-      segment.nextSegment = nextBeltTile.segmentId;
+      // Don't link to a segment going the opposite direction (would send items backwards)
+      if (nextBeltTile.direction !== oppositeDirection(segment.direction)) {
+        segment.nextSegment = nextBeltTile.segmentId;
+      }
     }
   }
 
