@@ -56,6 +56,21 @@ export type InventoryComponent = {
   maxSize: number;
 };
 
+/** A splitter routes items from one input to two outputs (round-robin). */
+export type SplitterComponent = {
+  toggleState: boolean; // false = output A, true = output B
+};
+
+/** A merger pulls items from two inputs into one output (alternating). */
+export type MergerComponent = {
+  pullState: 0 | 1; // which input to pull from next
+};
+
+/** A tunnel entrance/exit pair — items teleport between paired tunnels. */
+export type TunnelComponent = {
+  pairedTunnelId: EntityId | null;
+};
+
 /** Identifies which building definition this entity is based on. */
 export type BuildingComponent = {
   buildingId: string;
@@ -75,6 +90,9 @@ export interface Entity {
   processor?: ProcessorComponent;
   assembler?: AssemblerComponent;
   seller?: SellerComponent;
+  splitter?: SplitterComponent;
+  merger?: MergerComponent;
+  tunnel?: TunnelComponent;
   beltNode?: BeltNodeComponent;
   inventory?: InventoryComponent;
   building?: BuildingComponent;

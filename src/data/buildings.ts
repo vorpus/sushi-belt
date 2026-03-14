@@ -23,6 +23,9 @@ export interface BuildingDefinition {
     processor?: { recipeId: string };
     assembler?: { recipeId: string };
     seller?: { acceptsCategories: string[] };
+    splitter?: boolean;
+    merger?: boolean;
+    tunnel?: boolean;
   };
   connectionPoints: {
     inputs?: BuildingConnectionPoint[];
@@ -118,6 +121,48 @@ export const BUILDINGS = {
     connectionPoints: { inputs: [{ side: 'west', offset: 0 }] },
     unlockCost: 100,
     sprite: 'building_sushi_shop',
+  },
+  splitter: {
+    id: 'splitter',
+    name: 'Splitter',
+    size: { w: 1, h: 1 },
+    cost: 0,
+    terrain: 'land',
+    components: { splitter: true },
+    connectionPoints: {
+      inputs: [{ side: 'west', offset: 0 }],
+      outputs: [{ side: 'north', offset: 0 }, { side: 'south', offset: 0 }],
+    },
+    unlockCost: 50,
+    sprite: 'building_splitter',
+  },
+  merger: {
+    id: 'merger',
+    name: 'Merger',
+    size: { w: 1, h: 1 },
+    cost: 0,
+    terrain: 'land',
+    components: { merger: true },
+    connectionPoints: {
+      inputs: [{ side: 'north', offset: 0 }, { side: 'south', offset: 0 }],
+      outputs: [{ side: 'east', offset: 0 }],
+    },
+    unlockCost: 75,
+    sprite: 'building_merger',
+  },
+  tunnel: {
+    id: 'tunnel',
+    name: 'Tunnel',
+    size: { w: 1, h: 1 },
+    cost: 0,
+    terrain: 'land',
+    components: { tunnel: true },
+    connectionPoints: {
+      inputs: [{ side: 'west', offset: 0 }],
+      outputs: [{ side: 'east', offset: 0 }],
+    },
+    unlockCost: 300,
+    sprite: 'building_tunnel',
   },
 } as const satisfies Record<string, BuildingDefinition>;
 

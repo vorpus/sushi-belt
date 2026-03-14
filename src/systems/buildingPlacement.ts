@@ -81,6 +81,18 @@ export function placeBuilding(
     entity.inventory = { items: [], maxSize: 5 };
   }
 
+  if (def.components.splitter) {
+    entity.splitter = { toggleState: false };
+  }
+
+  if (def.components.merger) {
+    entity.merger = { pullState: 0 };
+  }
+
+  if (def.components.tunnel) {
+    entity.tunnel = { pairedTunnelId: null };
+  }
+
   if (def.components.assembler) {
     entity.assembler = {
       recipeId: def.components.assembler.recipeId,
