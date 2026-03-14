@@ -88,8 +88,8 @@ export function sourceSystem(
 ): void {
   for (const entity of state.entities.values()) {
     if (!entity.source) continue;
-    // Skip processor entities — their outputBuffer is managed by processorSystem
-    if (entity.processor) continue;
+    // Skip processor/assembler entities — their outputBuffer is managed by their own systems
+    if (entity.processor || entity.assembler) continue;
 
     entity.source.timer -= dt;
 
