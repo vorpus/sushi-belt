@@ -4,19 +4,22 @@
 
 import type { ToolState, Tool } from './tools.ts';
 import { BUILDINGS, type BuildingId } from '../data/buildings.ts';
+import type { GameState } from '../core/state.ts';
 
 const ROTATION_ICONS = ['⬆️', '➡️', '⬇️', '⬅️'];
 
 export class Toolbar {
   private toolState: ToolState;
+  private state: GameState;
   private toolButtons: NodeListOf<Element>;
   private buildingButtons: NodeListOf<Element>;
   private buildingPicker: HTMLElement;
   private rotateBtn: HTMLElement | null;
   private rotateIcon: HTMLElement | null;
 
-  constructor(toolState: ToolState) {
+  constructor(toolState: ToolState, state: GameState) {
     this.toolState = toolState;
+    this.state = state;
     this.toolButtons = document.querySelectorAll('#toolbar .tool-btn[data-tool]');
     this.buildingButtons = document.querySelectorAll('#building-picker .building-btn');
     this.buildingPicker = document.getElementById('building-picker')!;
@@ -87,9 +90,11 @@ export class Toolbar {
       this.rotateIcon.textContent = ROTATION_ICONS[this.toolState.rotation] ?? '⬆️';
     }
 
-    // Update building buttons
+    // Update building buttons — hide locked buildings
     this.buildingButtons.forEach((btn) => {
       const id = (btn as HTMLElement).dataset.building;
+      const unlocked = id ? this.state.unlocks.has(id) : false;
+      (btn as HTMLElement).style.display = unlocked ? '' : 'none';
       btn.classList.toggle('active', id === this.toolState.selectedBuilding);
     });
   }

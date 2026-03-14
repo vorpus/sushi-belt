@@ -59,14 +59,14 @@ export const BUILDINGS = {
     id: 'cutting_board',
     name: 'Cutting Board',
     size: { w: 1, h: 1 },
-    cost: 25,
+    cost: 0,
     terrain: 'land',
     components: { processor: { recipeId: 'cut_fish' } },
     connectionPoints: {
       inputs: [{ side: 'west', offset: 0 }],
       outputs: [{ side: 'east', offset: 0 }],
     },
-    unlockCost: 0,
+    unlockCost: 25,
     sprite: 'building_cutting_board',
   },
 } as const satisfies Record<string, BuildingDefinition>;

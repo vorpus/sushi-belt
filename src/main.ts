@@ -7,6 +7,7 @@ import { createCamera } from './input/camera';
 import { createToolState } from './input/tools';
 import { InputManager } from './input/inputManager';
 import { Toolbar } from './input/toolbar';
+import { Shop } from './input/shop';
 
 const GRID_WIDTH = 32;
 const GRID_HEIGHT = 24;
@@ -38,11 +39,18 @@ const GRID_HEIGHT = 24;
   // 5b. Add HUD overlay directly to stage (not affected by camera)
   app.stage.addChild(renderer.uiRenderer.container);
 
-  // 6. Set up input manager and toolbar
+  // 6. Set up input manager, toolbar, and shop
   const toolState = createToolState();
   const inputManager = new InputManager(viewport, state, events, toolState, renderer);
-  const toolbar = new Toolbar(toolState);
+  const toolbar = new Toolbar(toolState, state);
   inputManager.setToolbar(toolbar);
+  const shop = new Shop(state, events, toolState, toolbar);
+
+  // Re-sync toolbar when unlocks change (new buildings become available)
+  events.on('unlockPurchased', () => {
+    toolbar.syncUI();
+    shop.updateUI();
+  });
 
   // 7. Create and start game loop
   const gameLoop = new GameLoop({ state, events, renderer });

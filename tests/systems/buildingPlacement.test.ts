@@ -82,6 +82,7 @@ describe('buildingPlacement', () => {
 
     it('rotates connection points when placing with rotation', () => {
       const state = createInitialState(10, 10);
+      state.unlocks.add('cutting_board');
       const events = new EventBus();
 
       // Cutting board default: input west, output east

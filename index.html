@@ -118,6 +118,99 @@
         font-size: 9px;
         color: rgba(255, 255, 255, 0.35);
       }
+
+      /* ── Shop Panel ── */
+      #shop-panel {
+        position: fixed;
+        top: 60px;
+        right: 0;
+        width: 180px;
+        max-height: calc(100vh - 140px);
+        overflow-y: auto;
+        background: rgba(10, 10, 30, 0.85);
+        backdrop-filter: blur(8px);
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0 0 0 8px;
+        z-index: 10;
+        user-select: none;
+        pointer-events: auto;
+      }
+      .shop-header {
+        padding: 8px 12px;
+        font-family: monospace;
+        font-size: 14px;
+        font-weight: bold;
+        color: #fff;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .shop-section {
+        padding: 4px 0;
+      }
+      .shop-section-title {
+        padding: 4px 12px;
+        font-family: monospace;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .shop-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        font-family: monospace;
+        font-size: 11px;
+        color: #ccc;
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+      .shop-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .shop-item.unlocked {
+        color: #8f8;
+      }
+      .shop-item.affordable {
+        color: #fff;
+        background: rgba(80, 140, 255, 0.1);
+      }
+      .shop-item.affordable:hover {
+        background: rgba(80, 140, 255, 0.2);
+      }
+      .shop-item.locked {
+        color: #666;
+        cursor: default;
+      }
+      .shop-item .shop-icon {
+        font-size: 14px;
+        width: 20px;
+        text-align: center;
+      }
+      .shop-item .shop-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .shop-item .shop-name {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .shop-item .shop-cost {
+        display: block;
+        font-size: 9px;
+        color: rgba(255, 255, 255, 0.4);
+      }
+      .shop-item.affordable .shop-cost {
+        color: #ffcc44;
+      }
+      .shop-item .shop-status {
+        font-size: 12px;
+        width: 16px;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
@@ -163,6 +256,17 @@
         <span>Cutting Board</span>
         <span class="b-terrain">land · $25</span>
       </button>
+    </div>
+
+    <!-- Shop panel (right side) -->
+    <div id="shop-panel">
+      <div class="shop-header">Shop</div>
+      <div id="shop-buildings" class="shop-section">
+        <div class="shop-section-title">Buildings</div>
+      </div>
+      <div id="shop-upgrades" class="shop-section">
+        <div class="shop-section-title">Upgrades</div>
+      </div>
     </div>
 
     <script type="module" src="/src/main.ts"></script>
