@@ -20,6 +20,14 @@ const BUILDING_COLORS: Record<string, number> = {
   splitter: 0x66aacc,
   merger: 0xcc9944,
   tunnel: 0x555577,
+  seaweed_farm: 0x226644,
+  garden_plot: 0x44aa22,
+  seasoning_station: 0xddaa44,
+  pickling_barrel: 0x668844,
+  maki_roller: 0x336644,
+  gunkan_wrapper: 0x445544,
+  veggie_roll_station: 0x55aa44,
+  temaki_station: 0x884444,
 };
 
 export class BuildingRenderer {

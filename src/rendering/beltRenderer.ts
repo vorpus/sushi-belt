@@ -15,7 +15,15 @@ const ITEM_COLORS: Record<string, number> = {
   fish_cut: 0xff8866,
   rice: 0xeedd88,
   sushi_rice: 0xffffff,
+  seasoned_rice: 0xffeeaa,
+  nori: 0x224422,
+  vegetables: 0x44bb44,
+  pickled_veg: 0x88cc44,
   nigiri: 0xff6699,
+  maki: 0x336633,
+  gunkan: 0x445544,
+  veggie_roll: 0x55aa55,
+  temaki: 0x884444,
 };
 
 const ITEM_RADIUS = 5;
