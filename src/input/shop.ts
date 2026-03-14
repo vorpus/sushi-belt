@@ -21,6 +21,14 @@ const BUILDING_ICONS: Record<string, string> = {
   splitter: '\u{1F500}',
   merger: '\u{1F504}',
   tunnel: '\u{1F573}',
+  seaweed_farm: '\u{1F33F}',
+  garden_plot: '\u{1F96C}',
+  seasoning_station: '\u{1F9C2}',
+  pickling_barrel: '\u{1F952}',
+  maki_roller: '\u{1F371}',
+  gunkan_wrapper: '\u{1F358}',
+  veggie_roll_station: '\u{1F957}',
+  temaki_station: '\u{1F32E}',
 };
 
 const UPGRADE_ICONS: Record<string, string> = {
