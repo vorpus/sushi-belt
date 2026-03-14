@@ -117,7 +117,7 @@ export function createInitialState(
   return {
     tick: 0,
     funds: 0,
-    unlocks: new Set<string>(),
+    unlocks: new Set<string>(['fishing_boat', 'fish_market']),
     entities: new Map<EntityId, Entity>(),
     grid,
     beltGrid: new Map<string, BeltTile>(),

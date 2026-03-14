@@ -24,6 +24,11 @@ export function placeBuilding(
 ): Entity | null {
   const def: BuildingDefinition = BUILDINGS[buildingId];
 
+  // Check if building is unlocked
+  if (!state.unlocks.has(buildingId)) {
+    return null;
+  }
+
   // Check all tiles in the building footprint
   for (let dy = 0; dy < def.size.h; dy++) {
     for (let dx = 0; dx < def.size.w; dx++) {

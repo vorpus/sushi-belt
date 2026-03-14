@@ -12,6 +12,7 @@ import { TICK_DURATION_S } from '../../src/core/gameLoop';
 
 function createProcessingLoop() {
   const state = createInitialState(16, 10);
+  state.unlocks.add('cutting_board');
   const events = new EventBus();
   const economySystem = createEconomySystem();
   economySystem(state, events);

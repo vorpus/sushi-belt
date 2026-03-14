@@ -4,6 +4,8 @@
 
 import type { GameState } from '../core/state.ts';
 import type { EventBus } from '../core/eventBus.ts';
+import { BUILDINGS, type BuildingId } from '../data/buildings.ts';
+import { UPGRADES, type UpgradeId } from '../data/upgrades.ts';
 
 /**
  * Listen for `itemSold` events and update funds and stats.
@@ -39,4 +41,54 @@ export function createEconomySystem(): (state: GameState, events: EventBus) => v
 
     pendingSales = [];
   };
+}
+
+/**
+ * Purchase a building unlock. Deducts funds and adds to state.unlocks.
+ * Returns true if the purchase succeeded.
+ */
+export function purchaseUnlock(
+  state: GameState,
+  buildingId: BuildingId,
+  events: EventBus,
+): boolean {
+  if (state.unlocks.has(buildingId)) return false;
+
+  const def = BUILDINGS[buildingId];
+  if (!def) return false;
+  if (state.funds < def.unlockCost) return false;
+
+  const oldAmount = state.funds;
+  state.funds -= def.unlockCost;
+  state.unlocks.add(buildingId);
+
+  events.emit('unlockPurchased', { unlockId: buildingId });
+  events.emit('fundsChanged', { oldAmount, newAmount: state.funds });
+
+  return true;
+}
+
+/**
+ * Purchase an upgrade level. Deducts funds and increments upgrade level.
+ * Returns true if the purchase succeeded.
+ */
+export function purchaseUpgrade(
+  state: GameState,
+  upgradeId: UpgradeId,
+  events: EventBus,
+): boolean {
+  const def = UPGRADES[upgradeId];
+  if (!def) return false;
+
+  const currentLevel = state.upgrades[upgradeId] ?? 0;
+  if (currentLevel >= def.maxLevel) return false;
+  if (state.funds < def.cost) return false;
+
+  const oldAmount = state.funds;
+  state.funds -= def.cost;
+  state.upgrades[upgradeId] = currentLevel + 1;
+
+  events.emit('fundsChanged', { oldAmount, newAmount: state.funds });
+
+  return true;
 }

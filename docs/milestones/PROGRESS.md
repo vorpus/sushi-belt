@@ -1,6 +1,6 @@
 # Sushi Belt — Progress
 
-## Current Milestone: M5 — Processing & Recipes (COMPLETE)
+## Current Milestone: M6 — Shop & Unlocks (COMPLETE)
 
 ### M1 Tasks (COMPLETE)
 - [x] 1.1: Initialize project with Vite + TypeScript
@@ -55,14 +55,14 @@
 - [x] 5.6: Integration test — processing chain — Done: fishing_boat → belt → cutting_board → belt → fish_market test (1800 ticks), buffered output test
 - [x] 5.7: Update CLAUDE.md — Done: added processorSystem, recipes, fish_cut item, cutting_board building
 
-### M6 Tasks — Shop & Unlocks
-- [ ] 6.1: Unlock and upgrade data
-- [ ] 6.2: Economy system — purchase and unlock logic
-- [ ] 6.3: Shop renderer — panel UI
-- [ ] 6.4: Building tool — select from unlocked buildings
-- [ ] 6.5: Starter state and initial unlocks
-- [ ] 6.6: Integration test — progression loop
-- [ ] 6.7: Update CLAUDE.md
+### M6 Tasks — Shop & Unlocks (COMPLETE — 2026-03-14)
+- [x] 6.1: Unlock and upgrade data — Done: created upgrades.ts (belt_speed), set cutting_board unlockCost=$25, moved cost to unlockCost
+- [x] 6.2: Economy system — purchase and unlock logic — Done: purchaseUnlock() and purchaseUpgrade() functions, unlock gating in placeBuilding(), 8 new tests
+- [x] 6.3: Shop renderer — panel UI — Done: HTML shop panel on right side showing locked/affordable/unlocked buildings and upgrades with click-to-purchase
+- [x] 6.4: Building tool — select from unlocked buildings — Done: toolbar building picker hides locked buildings, shop click selects building for placement
+- [x] 6.5: Starter state and initial unlocks — Done: createInitialState() starts with fishing_boat + fish_market unlocked, $0 funds
+- [x] 6.6: Integration test — progression loop — Done: earn raw fish income → purchase cutting board → place it, 2 tests
+- [x] 6.7: Update CLAUDE.md — Done: added shop, upgrades, unlock system docs
 
 ### M7 Tasks — Assembly & Multi-Input
 - [ ] 7.1: Rice items and recipe data
