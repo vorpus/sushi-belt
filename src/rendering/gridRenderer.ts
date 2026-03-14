@@ -4,6 +4,7 @@
 
 import { Container, Graphics } from 'pixi.js';
 import type { GameState } from '../core/state.ts';
+import type { GridPosition, Direction } from '../core/types.ts';
 
 export const TILE_SIZE = 48;
 
@@ -13,12 +14,14 @@ export class GridRenderer {
   private gridLines = new Graphics();
   private highlightGraphics = new Graphics();
   private ghostGraphics = new Graphics();
+  private beltPreviewGraphics = new Graphics();
   private dirty = true;
 
   constructor() {
     this.container.addChild(this.terrainGraphics);
     this.container.addChild(this.gridLines);
     this.container.addChild(this.highlightGraphics);
+    this.container.addChild(this.beltPreviewGraphics);
     this.container.addChild(this.ghostGraphics);
   }
 
@@ -75,6 +78,38 @@ export class GridRenderer {
       TILE_SIZE,
     );
     this.highlightGraphics.fill({ color: 0xffffff, alpha: 0.2 });
+  }
+
+  /** Show a preview of the belt path being dragged. */
+  renderBeltPreview(path: { pos: GridPosition; direction: Direction }[] | null): void {
+    this.beltPreviewGraphics.clear();
+    if (!path || path.length === 0) return;
+
+    const ARROW: Record<Direction, [number, number][]> = {
+      east: [[-0.3, -0.2], [0.3, 0], [-0.3, 0.2]],
+      west: [[0.3, -0.2], [-0.3, 0], [0.3, 0.2]],
+      south: [[-0.2, -0.3], [0, 0.3], [0.2, -0.3]],
+      north: [[-0.2, 0.3], [0, -0.3], [0.2, 0.3]],
+    };
+
+    for (const step of path) {
+      const px = step.pos.x * TILE_SIZE;
+      const py = step.pos.y * TILE_SIZE;
+
+      // Tile background
+      this.beltPreviewGraphics.rect(px + 2, py + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+      this.beltPreviewGraphics.fill({ color: 0x999999, alpha: 0.35 });
+
+      // Direction arrow
+      const cx = px + TILE_SIZE / 2;
+      const cy = py + TILE_SIZE / 2;
+      const pts = ARROW[step.direction];
+      this.beltPreviewGraphics.moveTo(cx + pts[0][0] * TILE_SIZE, cy + pts[0][1] * TILE_SIZE);
+      this.beltPreviewGraphics.lineTo(cx + pts[1][0] * TILE_SIZE, cy + pts[1][1] * TILE_SIZE);
+      this.beltPreviewGraphics.lineTo(cx + pts[2][0] * TILE_SIZE, cy + pts[2][1] * TILE_SIZE);
+      this.beltPreviewGraphics.closePath();
+      this.beltPreviewGraphics.fill({ color: 0xffffff, alpha: 0.4 });
+    }
   }
 
   /** Show a ghost building footprint. Color green if valid, red if invalid. */

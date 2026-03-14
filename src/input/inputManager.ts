@@ -14,13 +14,14 @@ import { BUILDINGS, type BuildingDefinition } from '../data/buildings.ts';
 import { placeBuilding, removeBuilding } from '../systems/buildingPlacement.ts';
 import { rebuildSegments } from '../systems/segmentBuilder.ts';
 import type { Renderer } from '../rendering/renderer.ts';
+import type { Toolbar } from './toolbar.ts';
 
 /**
  * Compute an L-shaped path of grid positions from start to end.
  * Goes horizontal first, then vertical.
  * Returns array of { pos, direction } for each step.
  */
-function computeBeltPath(
+export function computeBeltPath(
   start: GridPosition,
   end: GridPosition,
 ): { pos: GridPosition; direction: Direction }[] {
@@ -65,6 +66,7 @@ export class InputManager {
   private events: EventBus;
   private toolState: ToolState;
   private renderer: Renderer;
+  private toolbar: Toolbar | null = null;
 
   /** Belt drag state */
   private beltDragStart: GridPosition | null = null;
@@ -89,6 +91,11 @@ export class InputManager {
 
     // Keyboard shortcuts
     window.addEventListener('keydown', this.onKeyDown.bind(this));
+    window.addEventListener('keyup', this.onKeyUp.bind(this));
+  }
+
+  setToolbar(toolbar: Toolbar): void {
+    this.toolbar = toolbar;
   }
 
   private screenToGrid(screenX: number, screenY: number): GridPosition | null {
@@ -106,20 +113,75 @@ export class InputManager {
     return { x: gx, y: gy };
   }
 
+  /** Keys currently held down for camera panning. */
+  private keysDown = new Set<string>();
+  private panTickerId: number | null = null;
+
+  private startPanLoop(): void {
+    if (this.panTickerId !== null) return;
+    const PAN_SPEED = 8;
+    const tick = () => {
+      let dx = 0;
+      let dy = 0;
+      if (this.keysDown.has('left')) dx -= PAN_SPEED;
+      if (this.keysDown.has('right')) dx += PAN_SPEED;
+      if (this.keysDown.has('up')) dy -= PAN_SPEED;
+      if (this.keysDown.has('down')) dy += PAN_SPEED;
+      if (dx !== 0 || dy !== 0) {
+        this.viewport.moveCenter(
+          this.viewport.center.x + dx / this.viewport.scale.x,
+          this.viewport.center.y + dy / this.viewport.scale.y,
+        );
+      }
+      if (this.keysDown.size > 0) {
+        this.panTickerId = requestAnimationFrame(tick);
+      } else {
+        this.panTickerId = null;
+      }
+    };
+    this.panTickerId = requestAnimationFrame(tick);
+  }
+
+  private onKeyUp(e: KeyboardEvent): void {
+    const dir = this.keyToDir(e.key);
+    if (dir) this.keysDown.delete(dir);
+  }
+
+  private keyToDir(key: string): string | null {
+    switch (key) {
+      case 'w': case 'W': case 'ArrowUp': return 'up';
+      case 's': case 'S': case 'ArrowDown': return 'down';
+      case 'a': case 'A': case 'ArrowLeft': return 'left';
+      case 'd': case 'D': case 'ArrowRight': return 'right';
+      default: return null;
+    }
+  }
+
   private onKeyDown(e: KeyboardEvent): void {
+    // Camera panning
+    const dir = this.keyToDir(e.key);
+    if (dir) {
+      this.keysDown.add(dir);
+      this.startPanLoop();
+      return;
+    }
+
     if (e.key === 'b' || e.key === 'B') {
       this.toolState.activeTool =
         this.toolState.activeTool === 'place_belt' ? 'place_building' : 'place_belt';
       this.updatePreview();
+      this.toolbar?.syncUI();
     } else if (e.key === 'x' || e.key === 'X') {
       this.toolState.activeTool =
         this.toolState.activeTool === 'delete' ? 'select' : 'delete';
       this.updatePreview();
+      this.toolbar?.syncUI();
     } else if (e.key === 'Escape') {
       this.toolState.activeTool = 'select';
       this.beltDragStart = null;
       this.dragging = false;
       this.updatePreview();
+      this.toolbar?.syncUI();
     }
   }
 
@@ -258,14 +320,22 @@ export class InputManager {
         valid,
       );
       this.renderer.gridRenderer.renderHighlight(null, null);
+      this.renderer.gridRenderer.renderBeltPreview(null);
     } else if (
       this.toolState.activeTool === 'place_belt' &&
       this.gridX !== null &&
       this.gridY !== null
     ) {
-      // Show single-tile highlight for belt placement
+      // Show belt path preview while dragging, or single-tile highlight otherwise
       this.renderer.gridRenderer.renderGhost(null, null, 0, 0, false);
-      this.renderer.gridRenderer.renderHighlight(this.gridX, this.gridY);
+      if (this.dragging && this.beltDragStart) {
+        const path = computeBeltPath(this.beltDragStart, { x: this.gridX, y: this.gridY });
+        this.renderer.gridRenderer.renderBeltPreview(path);
+        this.renderer.gridRenderer.renderHighlight(null, null);
+      } else {
+        this.renderer.gridRenderer.renderBeltPreview(null);
+        this.renderer.gridRenderer.renderHighlight(this.gridX, this.gridY);
+      }
     } else if (
       this.toolState.activeTool === 'delete' &&
       this.gridX !== null &&
@@ -280,9 +350,11 @@ export class InputManager {
         false, // red = invalid color = delete indicator
       );
       this.renderer.gridRenderer.renderHighlight(null, null);
+      this.renderer.gridRenderer.renderBeltPreview(null);
     } else {
       this.renderer.gridRenderer.renderGhost(null, null, 0, 0, false);
       this.renderer.gridRenderer.renderHighlight(this.gridX, this.gridY);
+      this.renderer.gridRenderer.renderBeltPreview(null);
     }
   }
 
