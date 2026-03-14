@@ -6,7 +6,7 @@ import type { ToolState, Tool } from './tools.ts';
 import { BUILDINGS, type BuildingId } from '../data/buildings.ts';
 import type { GameState } from '../core/state.ts';
 
-const ROTATION_ICONS = ['⬆️', '➡️', '⬇️', '⬅️'];
+const ROTATION_ICONS = ['\u2B06\uFE0F', '\u27A1\uFE0F', '\u2B07\uFE0F', '\u2B05\uFE0F'];
 
 export class Toolbar {
   private toolState: ToolState;
@@ -20,7 +20,7 @@ export class Toolbar {
   constructor(toolState: ToolState, state: GameState) {
     this.toolState = toolState;
     this.state = state;
-    this.toolButtons = document.querySelectorAll('#toolbar .tool-btn[data-tool]');
+    this.toolButtons = document.querySelectorAll('#tool-row .tool-btn[data-tool]');
     this.buildingButtons = document.querySelectorAll('#building-picker .building-btn');
     this.buildingPicker = document.getElementById('building-picker')!;
     this.rotateBtn = document.getElementById('rotate-btn');
@@ -55,7 +55,6 @@ export class Toolbar {
       });
     });
 
-    // Sync initial state
     this.syncUI();
   }
 
@@ -70,27 +69,22 @@ export class Toolbar {
     this.syncUI();
   }
 
-  /** Call this whenever toolState changes externally (e.g. keyboard shortcut). */
   syncUI(): void {
-    // Update tool buttons
     this.toolButtons.forEach((btn) => {
       const tool = (btn as HTMLElement).dataset.tool;
       btn.classList.toggle('active', tool === this.toolState.activeTool);
     });
 
-    // Show/hide building picker and rotate button
     const showPicker = this.toolState.activeTool === 'place_building';
     this.buildingPicker.classList.toggle('visible', showPicker);
     if (this.rotateBtn) {
-      this.rotateBtn.style.display = showPicker ? '' : 'none';
+      this.rotateBtn.style.display = showPicker || this.toolState.activeTool === 'place_belt' ? '' : 'none';
     }
 
-    // Update rotation icon
     if (this.rotateIcon) {
-      this.rotateIcon.textContent = ROTATION_ICONS[this.toolState.rotation] ?? '⬆️';
+      this.rotateIcon.textContent = ROTATION_ICONS[this.toolState.rotation] ?? '\u2B06\uFE0F';
     }
 
-    // Update building buttons — hide locked buildings
     this.buildingButtons.forEach((btn) => {
       const id = (btn as HTMLElement).dataset.building;
       const unlocked = id ? this.state.unlocks.has(id) : false;
