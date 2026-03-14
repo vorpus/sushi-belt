@@ -21,6 +21,20 @@ export const RECIPES = {
     processingTime: 2.0,
     building: 'cutting_board',
   },
+  cook_rice: {
+    id: 'cook_rice',
+    inputs: [{ item: 'rice', count: 1 }],
+    outputs: [{ item: 'sushi_rice', count: 1 }],
+    processingTime: 3.0,
+    building: 'rice_cooker',
+  },
+  make_nigiri: {
+    id: 'make_nigiri',
+    inputs: [{ item: 'fish_cut', count: 1 }, { item: 'sushi_rice', count: 1 }],
+    outputs: [{ item: 'nigiri', count: 1 }],
+    processingTime: 3.0,
+    building: 'nigiri_press',
+  },
 } as const satisfies Record<string, RecipeDefinition>;
 
 export type RecipeId = keyof typeof RECIPES;

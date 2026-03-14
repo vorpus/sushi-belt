@@ -1,6 +1,6 @@
 # Sushi Belt — Progress
 
-## Current Milestone: M6 — Shop & Unlocks (COMPLETE)
+## Current Milestone: M7 — Assembly & Multi-Input (COMPLETE)
 
 ### M1 Tasks (COMPLETE)
 - [x] 1.1: Initialize project with Vite + TypeScript
@@ -64,15 +64,15 @@
 - [x] 6.6: Integration test — progression loop — Done: earn raw fish income → purchase cutting board → place it, 2 tests
 - [x] 6.7: Update CLAUDE.md — Done: added shop, upgrades, unlock system docs
 
-### M7 Tasks — Assembly & Multi-Input
-- [ ] 7.1: Rice items and recipe data
-- [ ] 7.2: Rice buildings data
-- [ ] 7.3: Assembler system
-- [ ] 7.4: Multi-input building — inventory routing
-- [ ] 7.5: Nigiri press and sushi shop building data
-- [ ] 7.6: Assembler rendering — input slots and progress
-- [ ] 7.7: Integration test — nigiri production chain
-- [ ] 7.8: Update CLAUDE.md
+### M7 Tasks — Assembly & Multi-Input (COMPLETE — 2026-03-14)
+- [x] 7.1: Rice items and recipe data — Done: added rice (raw, $1), sushi_rice (processed, $3), nigiri (sushi, $15), cook_rice and make_nigiri recipes
+- [x] 7.2: Rice buildings data — Done: rice_paddy (2x2 land, source, $50 unlock), rice_cooker (1x1 land, processor, $75 unlock)
+- [x] 7.3: Assembler system — Done: WAITING→ASSEMBLING→COMPLETE state machine, item-type-based input routing, 5 tests
+- [x] 7.4: Multi-input building — inventory routing — Done: belt delivers to inventory, assembler routes items to correct input slots by type
+- [x] 7.5: Nigiri press and sushi shop — Done: nigiri_press (2x1 land, 2 inputs north/south, $150 unlock), sushi_shop (1x1 land, sells sushi, $100 unlock)
+- [x] 7.6: Assembler rendering — Done: progress bar for assemblers, building colors for all new buildings, item colors on belts
+- [x] 7.7: Integration test — nigiri chain — Done: full boat→cutter→press←cooker←paddy→shop test, 3600 ticks
+- [x] 7.8: Update CLAUDE.md — Done
 
 ### M8 Tasks — Belt Network Tools
 - [ ] 8.1: Splitter data and entity

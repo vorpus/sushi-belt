@@ -13,6 +13,10 @@ const BUILDING_COLORS: Record<string, number> = {
   fishing_boat: 0x2255aa,
   fish_market: 0xe87f22,
   cutting_board: 0x8b6914,
+  rice_paddy: 0x55aa22,
+  rice_cooker: 0xaa5522,
+  nigiri_press: 0x884488,
+  sushi_shop: 0xcc3344,
 };
 
 export class BuildingRenderer {
@@ -72,11 +76,13 @@ export class BuildingRenderer {
       label.y = py + ph / 2;
       this.labels.addChild(label);
 
-      // Draw processing progress bar for processor buildings
-      if (entity.processor && entity.processor.processing) {
-        const recipe = RECIPES[entity.processor.recipeId as keyof typeof RECIPES];
+      // Draw processing progress bar for processor or assembler buildings
+      const activeProcessor = entity.processor?.processing ? entity.processor : null;
+      const activeAssembler = entity.assembler?.processing ? entity.assembler : null;
+      if (activeProcessor) {
+        const recipe = RECIPES[activeProcessor.recipeId as keyof typeof RECIPES];
         if (recipe) {
-          const progress = Math.min(entity.processor.progress / recipe.processingTime, 1);
+          const progress = Math.min(activeProcessor.progress / recipe.processingTime, 1);
           const barWidth = pw - inset * 4;
           const barHeight = 4;
           const barX = px + inset * 2;
@@ -87,6 +93,21 @@ export class BuildingRenderer {
           this.graphics.fill({ color: 0x000000, alpha: 0.4 });
 
           // Fill
+          this.graphics.rect(barX, barY, barWidth * progress, barHeight);
+          this.graphics.fill({ color: 0x44ff44, alpha: 0.8 });
+        }
+      } else if (activeAssembler) {
+        const recipe = RECIPES[activeAssembler.recipeId as keyof typeof RECIPES];
+        if (recipe) {
+          const progress = Math.min(activeAssembler.progress / recipe.processingTime, 1);
+          const barWidth = pw - inset * 4;
+          const barHeight = 4;
+          const barX = px + inset * 2;
+          const barY = py + ph - inset - barHeight - 2;
+
+          this.graphics.rect(barX, barY, barWidth, barHeight);
+          this.graphics.fill({ color: 0x000000, alpha: 0.4 });
+
           this.graphics.rect(barX, barY, barWidth * progress, barHeight);
           this.graphics.fill({ color: 0x44ff44, alpha: 0.8 });
         }

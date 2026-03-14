@@ -13,6 +13,9 @@ const BELT_ARROW_COLOR = 0xcccccc;
 const ITEM_COLORS: Record<string, number> = {
   fish: 0x4a90d9,
   fish_cut: 0xff8866,
+  rice: 0xeedd88,
+  sushi_rice: 0xffffff,
+  nigiri: 0xff6699,
 };
 
 const ITEM_RADIUS = 5;

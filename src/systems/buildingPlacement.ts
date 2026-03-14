@@ -81,6 +81,23 @@ export function placeBuilding(
     entity.inventory = { items: [], maxSize: 5 };
   }
 
+  if (def.components.assembler) {
+    entity.assembler = {
+      recipeId: def.components.assembler.recipeId,
+      progress: 0,
+      processing: false,
+      inputSlots: new Map(),
+    };
+    // Assembler needs inventory (for belt delivery) and source outputBuffer (for output)
+    entity.inventory = { items: [], maxSize: 10 };
+    entity.source = {
+      produces: '' as ItemId,
+      interval: Infinity,
+      timer: Infinity,
+      outputBuffer: [],
+    };
+  }
+
   if (def.components.processor) {
     entity.processor = {
       recipeId: def.components.processor.recipeId,

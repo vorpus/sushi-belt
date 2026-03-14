@@ -14,6 +14,10 @@ const BUILDING_ICONS: Record<string, string> = {
   fishing_boat: '\u{1F3A3}',
   fish_market: '\u{1F3EA}',
   cutting_board: '\u{1F52A}',
+  rice_paddy: '\u{1F33E}',
+  rice_cooker: '\u{1F35A}',
+  nigiri_press: '\u{1F363}',
+  sushi_shop: '\u{1F3EC}',
 };
 
 const UPGRADE_ICONS: Record<string, string> = {
