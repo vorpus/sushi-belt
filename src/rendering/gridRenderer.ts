@@ -5,8 +5,16 @@
 import { Container, Graphics } from 'pixi.js';
 import type { GameState } from '../core/state.ts';
 import type { GridPosition, Direction } from '../core/types.ts';
+import type { ConnectionPoint } from '../core/entity.ts';
 
 export const TILE_SIZE = 48;
+
+export interface GhostConnectionPoints {
+  inputs: ConnectionPoint[];
+  outputs: ConnectionPoint[];
+  buildingW: number;
+  buildingH: number;
+}
 
 export class GridRenderer {
   readonly container = new Container();
@@ -112,32 +120,100 @@ export class GridRenderer {
     }
   }
 
-  /** Show a ghost building footprint. Color green if valid, red if invalid. */
+  /** Show a ghost building footprint with connection point arrows. */
   renderGhost(
     gridX: number | null,
     gridY: number | null,
     sizeW: number,
     sizeH: number,
     valid: boolean,
+    connections?: GhostConnectionPoints | null,
   ): void {
     this.ghostGraphics.clear();
     if (gridX === null || gridY === null) return;
 
     const color = valid ? 0x00ff00 : 0xff0000;
-    this.ghostGraphics.rect(
-      gridX * TILE_SIZE,
-      gridY * TILE_SIZE,
-      sizeW * TILE_SIZE,
-      sizeH * TILE_SIZE,
-    );
+    const px = gridX * TILE_SIZE;
+    const py = gridY * TILE_SIZE;
+    const pw = sizeW * TILE_SIZE;
+    const ph = sizeH * TILE_SIZE;
+
+    this.ghostGraphics.rect(px, py, pw, ph);
     this.ghostGraphics.fill({ color, alpha: 0.3 });
     this.ghostGraphics.setStrokeStyle({ width: 2, color, alpha: 0.6 });
-    this.ghostGraphics.rect(
-      gridX * TILE_SIZE,
-      gridY * TILE_SIZE,
-      sizeW * TILE_SIZE,
-      sizeH * TILE_SIZE,
-    );
+    this.ghostGraphics.rect(px, py, pw, ph);
     this.ghostGraphics.stroke();
+
+    // Draw connection point arrows
+    if (connections) {
+      for (const cp of connections.inputs) {
+        this.drawConnectionArrow(gridX, gridY, connections.buildingW, connections.buildingH, cp, 0x44aaff, true);
+      }
+      for (const cp of connections.outputs) {
+        this.drawConnectionArrow(gridX, gridY, connections.buildingW, connections.buildingH, cp, 0xff8844, false);
+      }
+    }
+  }
+
+  /** Draw an arrow indicating a connection point on the ghost preview. */
+  private drawConnectionArrow(
+    gx: number,
+    gy: number,
+    bw: number,
+    bh: number,
+    cp: ConnectionPoint,
+    color: number,
+    isInput: boolean,
+  ): void {
+    // Calculate the position on the building edge
+    let edgeX: number, edgeY: number;
+    let arrowDx: number, arrowDy: number;
+
+    const halfTile = TILE_SIZE / 2;
+
+    switch (cp.side) {
+      case 'north':
+        edgeX = (gx + cp.offset) * TILE_SIZE + halfTile;
+        edgeY = gy * TILE_SIZE;
+        arrowDx = 0;
+        arrowDy = isInput ? 1 : -1;
+        break;
+      case 'south':
+        edgeX = (gx + cp.offset) * TILE_SIZE + halfTile;
+        edgeY = (gy + bh) * TILE_SIZE;
+        arrowDx = 0;
+        arrowDy = isInput ? -1 : 1;
+        break;
+      case 'west':
+        edgeX = gx * TILE_SIZE;
+        edgeY = (gy + cp.offset) * TILE_SIZE + halfTile;
+        arrowDx = isInput ? 1 : -1;
+        arrowDy = 0;
+        break;
+      case 'east':
+        edgeX = (gx + bw) * TILE_SIZE;
+        edgeY = (gy + cp.offset) * TILE_SIZE + halfTile;
+        arrowDx = isInput ? -1 : 1;
+        arrowDy = 0;
+        break;
+    }
+
+    // Draw a small triangle arrow pointing inward (input) or outward (output)
+    const arrowLen = 10;
+    const arrowWidth = 6;
+    const tipX = edgeX + arrowDx * arrowLen;
+    const tipY = edgeY + arrowDy * arrowLen;
+
+    // Base of triangle (perpendicular to arrow direction)
+    const baseX1 = edgeX + arrowDy * arrowWidth;
+    const baseY1 = edgeY - arrowDx * arrowWidth;
+    const baseX2 = edgeX - arrowDy * arrowWidth;
+    const baseY2 = edgeY + arrowDx * arrowWidth;
+
+    this.ghostGraphics.moveTo(tipX, tipY);
+    this.ghostGraphics.lineTo(baseX1, baseY1);
+    this.ghostGraphics.lineTo(baseX2, baseY2);
+    this.ghostGraphics.closePath();
+    this.ghostGraphics.fill({ color, alpha: 0.85 });
   }
 }

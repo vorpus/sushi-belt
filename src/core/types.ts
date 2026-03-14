@@ -38,6 +38,21 @@ export function oppositeDirection(dir: Direction): Direction {
   return OPPOSITE_MAP[dir];
 }
 
+const CW_MAP: Record<Direction, Direction> = {
+  north: 'east',
+  east: 'south',
+  south: 'west',
+  west: 'north',
+};
+
+/** Rotate a direction clockwise by `steps` × 90°. */
+export function rotateDirectionCW(dir: Direction, steps: number): Direction {
+  const n = ((steps % 4) + 4) % 4;
+  let d = dir;
+  for (let i = 0; i < n; i++) d = CW_MAP[d];
+  return d;
+}
+
 const DELTA_MAP: Record<Direction, { dx: number; dy: number }> = {
   north: { dx: 0, dy: -1 },
   south: { dx: 0, dy: 1 },

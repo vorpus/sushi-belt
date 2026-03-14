@@ -6,6 +6,7 @@ import { Container, Graphics, Text } from 'pixi.js';
 import type { GameState } from '../core/state.ts';
 import { BUILDINGS, type BuildingId } from '../data/buildings.ts';
 import { RECIPES } from '../data/recipes.ts';
+import type { ConnectionPoint } from '../core/entity.ts';
 import { TILE_SIZE } from './gridRenderer.ts';
 
 const BUILDING_COLORS: Record<string, number> = {
@@ -47,6 +48,16 @@ export class BuildingRenderer {
       this.graphics.rect(px + inset, py + inset, pw - inset * 2, ph - inset * 2);
       this.graphics.fill(color);
 
+      // Draw connection point arrows on placed buildings
+      if (entity.beltNode) {
+        for (const cp of entity.beltNode.inputs) {
+          this.drawConnectionArrow(entity.position.x, entity.position.y, def.size.w, def.size.h, cp, 0x44aaff, true);
+        }
+        for (const cp of entity.beltNode.outputs) {
+          this.drawConnectionArrow(entity.position.x, entity.position.y, def.size.w, def.size.h, cp, 0xff8844, false);
+        }
+      }
+
       // Draw label
       const label = new Text({
         text: def.name,
@@ -81,5 +92,64 @@ export class BuildingRenderer {
         }
       }
     }
+  }
+
+  /** Draw an arrow indicating a connection point on a placed building. */
+  private drawConnectionArrow(
+    gx: number,
+    gy: number,
+    bw: number,
+    bh: number,
+    cp: ConnectionPoint,
+    color: number,
+    isInput: boolean,
+  ): void {
+    let edgeX: number, edgeY: number;
+    let arrowDx: number, arrowDy: number;
+
+    const halfTile = TILE_SIZE / 2;
+
+    switch (cp.side) {
+      case 'north':
+        edgeX = (gx + cp.offset) * TILE_SIZE + halfTile;
+        edgeY = gy * TILE_SIZE;
+        arrowDx = 0;
+        arrowDy = isInput ? 1 : -1;
+        break;
+      case 'south':
+        edgeX = (gx + cp.offset) * TILE_SIZE + halfTile;
+        edgeY = (gy + bh) * TILE_SIZE;
+        arrowDx = 0;
+        arrowDy = isInput ? -1 : 1;
+        break;
+      case 'west':
+        edgeX = gx * TILE_SIZE;
+        edgeY = (gy + cp.offset) * TILE_SIZE + halfTile;
+        arrowDx = isInput ? 1 : -1;
+        arrowDy = 0;
+        break;
+      case 'east':
+        edgeX = (gx + bw) * TILE_SIZE;
+        edgeY = (gy + cp.offset) * TILE_SIZE + halfTile;
+        arrowDx = isInput ? -1 : 1;
+        arrowDy = 0;
+        break;
+    }
+
+    const arrowLen = 8;
+    const arrowWidth = 5;
+    const tipX = edgeX + arrowDx * arrowLen;
+    const tipY = edgeY + arrowDy * arrowLen;
+
+    const baseX1 = edgeX + arrowDy * arrowWidth;
+    const baseY1 = edgeY - arrowDx * arrowWidth;
+    const baseX2 = edgeX - arrowDy * arrowWidth;
+    const baseY2 = edgeY + arrowDx * arrowWidth;
+
+    this.graphics.moveTo(tipX, tipY);
+    this.graphics.lineTo(baseX1, baseY1);
+    this.graphics.lineTo(baseX2, baseY2);
+    this.graphics.closePath();
+    this.graphics.fill({ color, alpha: 0.85 });
   }
 }

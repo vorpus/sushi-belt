@@ -80,6 +80,35 @@ describe('buildingPlacement', () => {
       expect(entity!.seller!.acceptsCategories).toContain('raw');
     });
 
+    it('rotates connection points when placing with rotation', () => {
+      const state = createInitialState(10, 10);
+      const events = new EventBus();
+
+      // Cutting board default: input west, output east
+      const cb0 = placeBuilding(state, 'cutting_board', { x: 3, y: 3 }, 0, events);
+      expect(cb0).not.toBeNull();
+      expect(cb0!.beltNode!.inputs[0].side).toBe('west');
+      expect(cb0!.beltNode!.outputs[0].side).toBe('east');
+
+      // Rotation 1 (90° CW): west→north, east→south
+      const cb1 = placeBuilding(state, 'cutting_board', { x: 5, y: 3 }, 1, events);
+      expect(cb1).not.toBeNull();
+      expect(cb1!.beltNode!.inputs[0].side).toBe('north');
+      expect(cb1!.beltNode!.outputs[0].side).toBe('south');
+
+      // Rotation 2 (180°): west→east, east→west
+      const cb2 = placeBuilding(state, 'cutting_board', { x: 7, y: 3 }, 2, events);
+      expect(cb2).not.toBeNull();
+      expect(cb2!.beltNode!.inputs[0].side).toBe('east');
+      expect(cb2!.beltNode!.outputs[0].side).toBe('west');
+
+      // Rotation 3 (270°): west→south, east→north
+      const cb3 = placeBuilding(state, 'cutting_board', { x: 9, y: 3 }, 3, events);
+      expect(cb3).not.toBeNull();
+      expect(cb3!.beltNode!.inputs[0].side).toBe('south');
+      expect(cb3!.beltNode!.outputs[0].side).toBe('north');
+    });
+
     it('emits buildingPlaced event', () => {
       const state = createInitialState(10, 10);
       const events = new EventBus();

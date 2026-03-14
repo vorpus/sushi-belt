@@ -10,7 +10,8 @@ import type { EventBus } from '../core/eventBus.ts';
 import type { GridPosition, Direction } from '../core/types.ts';
 import { TILE_SIZE } from '../rendering/gridRenderer.ts';
 import { type ToolState } from './tools.ts';
-import { BUILDINGS, type BuildingDefinition } from '../data/buildings.ts';
+import { BUILDINGS, type BuildingDefinition, type BuildingConnectionPoint } from '../data/buildings.ts';
+import { rotateDirectionCW } from '../core/types.ts';
 import { placeBuilding, removeBuilding } from '../systems/buildingPlacement.ts';
 import { rebuildSegments } from '../systems/segmentBuilder.ts';
 import type { Renderer } from '../rendering/renderer.ts';
@@ -176,6 +177,10 @@ export class InputManager {
         this.toolState.activeTool === 'delete' ? 'select' : 'delete';
       this.updatePreview();
       this.toolbar?.syncUI();
+    } else if (e.key === 'r' || e.key === 'R') {
+      this.toolState.rotation = (this.toolState.rotation + 1) % 4;
+      this.updatePreview();
+      this.toolbar?.syncUI();
     } else if (e.key === 'Escape') {
       this.toolState.activeTool = 'select';
       this.beltDragStart = null;
@@ -219,7 +224,7 @@ export class InputManager {
         this.state,
         this.toolState.selectedBuilding,
         pos,
-        0,
+        this.toolState.rotation,
         this.events,
       );
       if (result) {
@@ -305,6 +310,7 @@ export class InputManager {
       this.gridY !== null
     ) {
       const def: BuildingDefinition = BUILDINGS[this.toolState.selectedBuilding];
+      const rot = this.toolState.rotation;
       const valid = this.isPlacementValid(
         this.gridX,
         this.gridY,
@@ -312,12 +318,20 @@ export class InputManager {
         def.size.h,
         def.terrain,
       );
+      const rotateCPs = (cps: readonly BuildingConnectionPoint[]) =>
+        cps.map((cp) => ({ side: rotateDirectionCW(cp.side, rot), offset: cp.offset }));
       this.renderer.gridRenderer.renderGhost(
         this.gridX,
         this.gridY,
         def.size.w,
         def.size.h,
         valid,
+        {
+          inputs: def.connectionPoints.inputs ? rotateCPs(def.connectionPoints.inputs) : [],
+          outputs: def.connectionPoints.outputs ? rotateCPs(def.connectionPoints.outputs) : [],
+          buildingW: def.size.w,
+          buildingH: def.size.h,
+        },
       );
       this.renderer.gridRenderer.renderHighlight(null, null);
       this.renderer.gridRenderer.renderBeltPreview(null);

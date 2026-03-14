@@ -8,6 +8,8 @@ import type { Entity } from '../core/entity.ts';
 import { createEntity } from '../core/entity.ts';
 import { BUILDINGS, type BuildingId, type BuildingDefinition } from '../data/buildings.ts';
 import type { GridPosition, EntityId, ItemId } from '../core/types.ts';
+import { rotateDirectionCW } from '../core/types.ts';
+import type { ConnectionPoint } from '../core/entity.ts';
 
 /**
  * Validate and place a building on the grid.
@@ -90,14 +92,17 @@ export function placeBuilding(
     };
   }
 
-  // Set up connection points
+  // Set up connection points (rotated by building rotation)
   if (def.connectionPoints.inputs || def.connectionPoints.outputs) {
+    const rotateCPs = (cps: readonly ConnectionPoint[]): ConnectionPoint[] =>
+      cps.map((cp) => ({ side: rotateDirectionCW(cp.side, rotation), offset: cp.offset }));
+
     entity.beltNode = {
       inputs: def.connectionPoints.inputs
-        ? [...def.connectionPoints.inputs]
+        ? rotateCPs(def.connectionPoints.inputs)
         : [],
       outputs: def.connectionPoints.outputs
-        ? [...def.connectionPoints.outputs]
+        ? rotateCPs(def.connectionPoints.outputs)
         : [],
     };
   }
