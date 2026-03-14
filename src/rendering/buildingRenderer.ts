@@ -17,6 +17,9 @@ const BUILDING_COLORS: Record<string, number> = {
   rice_cooker: 0xaa5522,
   nigiri_press: 0x884488,
   sushi_shop: 0xcc3344,
+  splitter: 0x66aacc,
+  merger: 0xcc9944,
+  tunnel: 0x555577,
 };
 
 export class BuildingRenderer {

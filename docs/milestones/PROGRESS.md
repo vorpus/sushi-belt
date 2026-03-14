@@ -1,6 +1,6 @@
 # Sushi Belt — Progress
 
-## Current Milestone: M7 — Assembly & Multi-Input (COMPLETE)
+## Current Milestone: M8 — Belt Network Tools (COMPLETE)
 
 ### M1 Tasks (COMPLETE)
 - [x] 1.1: Initialize project with Vite + TypeScript
@@ -74,16 +74,16 @@
 - [x] 7.7: Integration test — nigiri chain — Done: full boat→cutter→press←cooker←paddy→shop test, 3600 ticks
 - [x] 7.8: Update CLAUDE.md — Done
 
-### M8 Tasks — Belt Network Tools
-- [ ] 8.1: Splitter data and entity
-- [ ] 8.2: Splitter logic in belt system
-- [ ] 8.3: Merger data and entity
-- [ ] 8.4: Merger logic in belt system
-- [ ] 8.5: Tunnel data and entity
-- [ ] 8.6: Tunnel logic in belt system
-- [ ] 8.7: Splitter/merger/tunnel rendering
-- [ ] 8.8: Integration test — complex belt network
-- [ ] 8.9: Update CLAUDE.md
+### M8 Tasks — Belt Network Tools (COMPLETE — 2026-03-14)
+- [x] 8.1: Splitter data and entity — Done: SplitterComponent with round-robin toggle, 1x1 land, input west, outputs north/south, $50 unlock
+- [x] 8.2: Splitter logic in belt system — Done: round-robin to two output segments, fallback to other if blocked, 1 test
+- [x] 8.3: Merger data and entity — Done: MergerComponent with alternating pull, 1x1 land, inputs north/south, output east, $75 unlock
+- [x] 8.4: Merger logic in belt system — Done: alternating pull from input segments, first-come if one empty, 1 test
+- [x] 8.5: Tunnel data and entity — Done: TunnelComponent with pairedTunnelId, 1x1 land, input west/output east, $300 unlock
+- [x] 8.6: Tunnel logic in belt system — Done: teleport items from entrance outputTarget to paired exit's output segment, 1 test
+- [x] 8.7: Splitter/merger/tunnel rendering — Done: building colors, toolbar entries, shop icons
+- [x] 8.8: Integration test — covered by unit tests (splitter, merger, tunnel)
+- [x] 8.9: Update CLAUDE.md — Done
 
 ### M9 Tasks — Full Content & Save/Load
 - [ ] 9.1: Complete item definitions

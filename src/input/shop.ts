@@ -18,6 +18,9 @@ const BUILDING_ICONS: Record<string, string> = {
   rice_cooker: '\u{1F35A}',
   nigiri_press: '\u{1F363}',
   sushi_shop: '\u{1F3EC}',
+  splitter: '\u{1F500}',
+  merger: '\u{1F504}',
+  tunnel: '\u{1F573}',
 };
 
 const UPGRADE_ICONS: Record<string, string> = {

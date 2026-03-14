@@ -39,7 +39,7 @@ Sushi Belt is a cozy conveyor-belt automation game built with TypeScript + PixiJ
 - `src/systems/sourceSystem.ts` — source buildings produce items; pushes to connected belt segments, falls back to `outputBuffer`; skips processor entities
 - `src/systems/processorSystem.ts` — IDLE→PROCESSING→output state machine; consumes from inventory, produces to outputBuffer, pushes to belt
 - `src/systems/assemblerSystem.ts` — multi-input assembly; routes inventory items to input slots by type, assembles when all inputs present, produces outputs
-- `src/systems/beltSystem.ts` — moves items along belt segments (transfer → advance per tick), topological ordering
+- `src/systems/beltSystem.ts` — moves items along belt segments (transfer → advance per tick), topological ordering; handles splitter (round-robin), merger (alternating pull), and tunnel (teleport) transfers
 - `src/systems/segmentBuilder.ts` — `rebuildSegments(state)` builds segment graph from belt grid (runs on belt placement, not per tick)
 - `src/systems/sellerSystem.ts` — sells items from building inventories; checks category match and emits `itemSold` events
 - `src/systems/economySystem.ts` — `createEconomySystem()` factory; `purchaseUnlock()` / `purchaseUpgrade()` for shop purchases; listens for `itemSold` events
