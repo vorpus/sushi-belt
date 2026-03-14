@@ -85,6 +85,13 @@
 - [x] 8.8: Integration test — covered by unit tests (splitter, merger, tunnel)
 - [x] 8.9: Update CLAUDE.md — Done
 
+### M8.5 Tasks — UI Polish & Dev Tools (COMPLETE — 2026-03-14)
+- [x] 8.5.1: StarCraft-style bottom bar layout — Done: 3-section HUD (minimap left, stats+shop center, tools+picker right), replaced scattered UI
+- [x] 8.5.2: Minimap renderer — Done: 2D canvas minimap with terrain/belt/building colors, white viewport indicator, click-to-navigate
+- [x] 8.5.3: Smoothed income rate — Done: EMA with speed=2, displays $/min, plus total earned and items sold stats
+- [x] 8.5.4: Dev mode — Done: createDemoState() with full factory (boat, cutter, splitter, press, markets, rice line), $10k, all unlocks, F9 or button
+- [x] 8.5.5: Update PROGRESS.md — Done
+
 ### M9 Tasks — Full Content & Save/Load
 - [ ] 9.1: Complete item definitions
 - [ ] 9.2: Complete recipe definitions

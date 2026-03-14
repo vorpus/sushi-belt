@@ -1,67 +1,50 @@
 // ---------------------------------------------------------------------------
-// UI Renderer — HUD overlay (funds display, income rate)
+// UI Renderer — HUD stats (funds, smoothed income, items sold)
 // ---------------------------------------------------------------------------
 
-import { Container, Text } from 'pixi.js';
+import { Container } from 'pixi.js';
 import type { GameState } from '../core/state.ts';
 
-const RECENT_WINDOW_TICKS = 60; // 1 second at 60Hz
+/** EMA smoothing speed — converges ~63% in 1/speed seconds. */
+const SMOOTH_SPEED = 2;
+const TICK_DT = 1 / 60;
 
 export class UIRenderer {
+  /** Empty container kept for compatibility with renderer pipeline. */
   readonly container = new Container();
-  private fundsText: Text;
-  private incomeText: Text;
-  private recentSales: { tick: number; value: number }[] = [];
+
   private lastFunds = 0;
+  private smoothedRate = 0; // $/sec, EMA-smoothed
+
+  private fundsEl: HTMLElement | null = null;
+  private incomeEl: HTMLElement | null = null;
+  private soldEl: HTMLElement | null = null;
+  private earnedEl: HTMLElement | null = null;
 
   constructor() {
-    this.fundsText = new Text({
-      text: '$0',
-      style: {
-        fontFamily: 'monospace',
-        fontSize: 20,
-        fill: 0xffffff,
-        fontWeight: 'bold',
-      },
-    });
-    this.fundsText.position.set(12, 12);
-
-    this.incomeText = new Text({
-      text: '',
-      style: {
-        fontFamily: 'monospace',
-        fontSize: 14,
-        fill: 0xaaffaa,
-      },
-    });
-    this.incomeText.position.set(12, 38);
-
-    this.container.addChild(this.fundsText);
-    this.container.addChild(this.incomeText);
+    this.fundsEl = document.getElementById('stat-funds');
+    this.incomeEl = document.getElementById('stat-income');
+    this.soldEl = document.getElementById('stat-sold');
+    this.earnedEl = document.getElementById('stat-earned');
   }
 
   render(state: GameState): void {
-    this.fundsText.text = `$${state.funds}`;
-
-    // Track income by detecting fund changes
-    if (state.funds > this.lastFunds) {
-      this.recentSales.push({
-        tick: state.tick,
-        value: state.funds - this.lastFunds,
-      });
-    }
+    // Compute instantaneous income this tick
+    const earned = Math.max(0, state.funds - this.lastFunds);
     this.lastFunds = state.funds;
 
-    // Prune old entries outside the window
-    const cutoff = state.tick - RECENT_WINDOW_TICKS;
-    this.recentSales = this.recentSales.filter((s) => s.tick >= cutoff);
+    const instantRate = earned / TICK_DT; // $/sec raw
+    // EMA: smoothedRate += (raw - smoothed) * (1 - exp(-speed * dt))
+    const alpha = 1 - Math.exp(-SMOOTH_SPEED * TICK_DT);
+    this.smoothedRate += (instantRate - this.smoothedRate) * alpha;
 
-    // Calculate income rate (per second)
-    const totalRecent = this.recentSales.reduce((sum, s) => sum + s.value, 0);
-    if (totalRecent > 0) {
-      this.incomeText.text = `$${totalRecent}/sec`;
-    } else {
-      this.incomeText.text = '';
+    // Update HTML stats
+    if (this.fundsEl) this.fundsEl.textContent = `$${state.funds}`;
+    if (this.incomeEl) {
+      const perMin = this.smoothedRate * 60;
+      this.incomeEl.textContent = perMin > 0.1 ? `$${perMin.toFixed(1)}/min` : '$0/min';
     }
+    if (this.soldEl) this.soldEl.textContent = `${state.stats.totalItemsSold}`;
+    if (this.earnedEl) this.earnedEl.textContent = `$${state.stats.totalMoneyEarned}`;
   }
 }

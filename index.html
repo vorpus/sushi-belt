@@ -7,300 +7,259 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a2e; }
-      canvas { display: block; width: 100vw; height: 100vh; }
+      canvas#game-canvas { display: block; width: 100vw; height: 100vh; }
 
-      /* ── Toolbar ── */
-      #toolbar {
+      /* ── Bottom HUD Bar ── */
+      #hud-bar {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
+        height: 120px;
         display: flex;
-        justify-content: center;
-        align-items: stretch;
-        gap: 4px;
-        padding: 8px 12px;
-        background: rgba(10, 10, 30, 0.85);
+        background: rgba(10, 10, 30, 0.92);
         backdrop-filter: blur(8px);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
         z-index: 10;
         user-select: none;
         pointer-events: auto;
+        font-family: monospace;
       }
-      #toolbar .separator {
-        width: 1px;
-        background: rgba(255, 255, 255, 0.15);
-        margin: 2px 6px;
+
+      /* ── Minimap (left) ── */
+      #minimap-section {
+        width: 180px;
+        min-width: 180px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 4px;
+      }
+      #minimap-canvas {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+      }
+
+      /* ── Center panel (stats + shop) ── */
+      #center-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      #stats-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 6px 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        flex-shrink: 0;
+      }
+      .stat {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+      }
+      .stat-label {
+        font-size: 9px;
+        color: rgba(255, 255, 255, 0.35);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .stat-value {
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+      }
+      .stat-value.income {
+        color: #aaffaa;
+      }
+      #shop-scroll {
+        flex: 1;
+        overflow-x: auto;
+        overflow-y: hidden;
+        display: flex;
+        gap: 2px;
+        padding: 4px 10px;
+        align-items: stretch;
+      }
+      .shop-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 4px 10px;
+        min-width: 72px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.03);
+        color: #888;
+        font-family: monospace;
+        font-size: 10px;
+        cursor: pointer;
+        transition: background 0.1s;
+        flex-shrink: 0;
+      }
+      .shop-item:hover { background: rgba(255, 255, 255, 0.08); }
+      .shop-item.unlocked { color: #8f8; }
+      .shop-item.affordable { color: #fff; background: rgba(80, 140, 255, 0.1); }
+      .shop-item.affordable:hover { background: rgba(80, 140, 255, 0.2); }
+      .shop-item.locked { color: #555; cursor: default; }
+      .shop-item .si-icon { font-size: 16px; }
+      .shop-item .si-cost { font-size: 9px; color: rgba(255, 255, 255, 0.35); }
+      .shop-item.affordable .si-cost { color: #ffcc44; }
+      .shop-item .si-status { font-size: 10px; }
+
+      /* ── Right panel (tools + building picker) ── */
+      #action-panel {
+        width: 280px;
+        min-width: 280px;
+        display: flex;
+        flex-direction: column;
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      #tool-row {
+        display: flex;
+        gap: 4px;
+        padding: 6px 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        flex-shrink: 0;
       }
       .tool-btn {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 3px;
-        padding: 6px 14px;
+        gap: 2px;
+        padding: 4px 10px;
         border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 6px;
         background: rgba(255, 255, 255, 0.05);
         color: #ccc;
         font-family: monospace;
-        font-size: 12px;
+        font-size: 11px;
         cursor: pointer;
-        transition: background 0.1s, border-color 0.1s;
-        min-width: 64px;
+        transition: background 0.1s;
+        flex: 1;
       }
-      .tool-btn:hover {
-        background: rgba(255, 255, 255, 0.12);
-        color: #fff;
-      }
-      .tool-btn.active {
-        background: rgba(80, 140, 255, 0.25);
-        border-color: rgba(80, 140, 255, 0.6);
-        color: #fff;
-      }
-      .tool-btn .icon {
-        font-size: 18px;
-        line-height: 1;
-      }
-      .tool-btn .hotkey {
-        font-size: 9px;
-        color: rgba(255, 255, 255, 0.35);
-      }
-
-      /* ── Building picker (shown when build tool active) ── */
+      .tool-btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+      .tool-btn.active { background: rgba(80, 140, 255, 0.25); border-color: rgba(80, 140, 255, 0.6); color: #fff; }
+      .tool-btn .icon { font-size: 16px; line-height: 1; }
+      .tool-btn .hotkey { font-size: 8px; color: rgba(255, 255, 255, 0.3); }
       #building-picker {
-        position: fixed;
-        bottom: 64px;
-        left: 50%;
-        transform: translateX(-50%);
+        flex: 1;
         display: none;
-        gap: 4px;
-        padding: 6px 10px;
-        background: rgba(10, 10, 30, 0.9);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        z-index: 11;
-        user-select: none;
+        flex-wrap: wrap;
+        gap: 3px;
+        padding: 4px 8px;
+        overflow-y: auto;
+        align-content: flex-start;
       }
-      #building-picker.visible {
-        display: flex;
-      }
+      #building-picker.visible { display: flex; }
       .building-btn {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 2px;
-        padding: 8px 14px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.05);
-        color: #ccc;
+        gap: 1px;
+        padding: 4px 6px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.04);
+        color: #aaa;
         font-family: monospace;
-        font-size: 11px;
-        cursor: pointer;
-        transition: background 0.1s, border-color 0.1s;
-      }
-      .building-btn:hover {
-        background: rgba(255, 255, 255, 0.12);
-        color: #fff;
-      }
-      .building-btn.active {
-        background: rgba(80, 140, 255, 0.25);
-        border-color: rgba(80, 140, 255, 0.6);
-        color: #fff;
-      }
-      .building-btn .b-icon {
-        font-size: 20px;
-        line-height: 1;
-      }
-      .building-btn .b-terrain {
         font-size: 9px;
-        color: rgba(255, 255, 255, 0.35);
-      }
-
-      /* ── Shop Panel ── */
-      #shop-panel {
-        position: fixed;
-        top: 60px;
-        right: 0;
-        width: 180px;
-        max-height: calc(100vh - 140px);
-        overflow-y: auto;
-        background: rgba(10, 10, 30, 0.85);
-        backdrop-filter: blur(8px);
-        border-left: 1px solid rgba(255, 255, 255, 0.1);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 0 0 0 8px;
-        z-index: 10;
-        user-select: none;
-        pointer-events: auto;
-      }
-      .shop-header {
-        padding: 8px 12px;
-        font-family: monospace;
-        font-size: 14px;
-        font-weight: bold;
-        color: #fff;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      .shop-section {
-        padding: 4px 0;
-      }
-      .shop-section-title {
-        padding: 4px 12px;
-        font-family: monospace;
-        font-size: 10px;
-        color: rgba(255, 255, 255, 0.4);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-      .shop-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 12px;
-        font-family: monospace;
-        font-size: 11px;
-        color: #ccc;
         cursor: pointer;
         transition: background 0.1s;
+        min-width: 56px;
       }
-      .shop-item:hover {
-        background: rgba(255, 255, 255, 0.08);
-      }
-      .shop-item.unlocked {
-        color: #8f8;
-      }
-      .shop-item.affordable {
-        color: #fff;
-        background: rgba(80, 140, 255, 0.1);
-      }
-      .shop-item.affordable:hover {
-        background: rgba(80, 140, 255, 0.2);
-      }
-      .shop-item.locked {
-        color: #666;
-        cursor: default;
-      }
-      .shop-item .shop-icon {
-        font-size: 14px;
-        width: 20px;
-        text-align: center;
-      }
-      .shop-item .shop-info {
-        flex: 1;
-        min-width: 0;
-      }
-      .shop-item .shop-name {
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .shop-item .shop-cost {
-        display: block;
-        font-size: 9px;
-        color: rgba(255, 255, 255, 0.4);
-      }
-      .shop-item.affordable .shop-cost {
+      .building-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+      .building-btn.active { background: rgba(80, 140, 255, 0.25); border-color: rgba(80, 140, 255, 0.6); color: #fff; }
+      .building-btn .b-icon { font-size: 16px; line-height: 1; }
+
+      /* ── Demo button ── */
+      #demo-btn {
+        position: fixed;
+        top: 8px;
+        right: 8px;
+        padding: 4px 10px;
+        border: 1px solid rgba(255, 180, 0, 0.4);
+        border-radius: 4px;
+        background: rgba(255, 180, 0, 0.15);
         color: #ffcc44;
+        font-family: monospace;
+        font-size: 11px;
+        cursor: pointer;
+        z-index: 20;
+        user-select: none;
       }
-      .shop-item .shop-status {
-        font-size: 12px;
-        width: 16px;
-        text-align: center;
-      }
+      #demo-btn:hover { background: rgba(255, 180, 0, 0.3); }
     </style>
   </head>
   <body>
-    <!-- Toolbar -->
-    <div id="toolbar">
-      <button class="tool-btn active" data-tool="place_building">
-        <span class="icon">🏠</span>
-        <span>Build</span>
-        <span class="hotkey">B</span>
-      </button>
-      <button class="tool-btn" id="rotate-btn" data-action="rotate">
-        <span class="icon" id="rotate-icon">⬆️</span>
-        <span>Rotate</span>
-        <span class="hotkey">R</span>
-      </button>
-      <button class="tool-btn" data-tool="place_belt">
-        <span class="icon">➡️</span>
-        <span>Belt</span>
-        <span class="hotkey">B</span>
-      </button>
-      <div class="separator"></div>
-      <button class="tool-btn" data-tool="delete">
-        <span class="icon">🗑️</span>
-        <span>Delete</span>
-        <span class="hotkey">X</span>
-      </button>
-    </div>
+    <!-- Demo button -->
+    <button id="demo-btn">Demo (F9)</button>
 
-    <!-- Building picker (appears above toolbar when Build is active) -->
-    <div id="building-picker" class="visible">
-      <button class="building-btn active" data-building="fishing_boat">
-        <span class="b-icon">🎣</span>
-        <span>Fishing Boat</span>
-        <span class="b-terrain">water · $0</span>
-      </button>
-      <button class="building-btn" data-building="fish_market">
-        <span class="b-icon">🏪</span>
-        <span>Fish Market</span>
-        <span class="b-terrain">land · $0</span>
-      </button>
-      <button class="building-btn" data-building="cutting_board">
-        <span class="b-icon">🔪</span>
-        <span>Cutting Board</span>
-        <span class="b-terrain">land</span>
-      </button>
-      <button class="building-btn" data-building="rice_paddy">
-        <span class="b-icon">🌾</span>
-        <span>Rice Paddy</span>
-        <span class="b-terrain">land</span>
-      </button>
-      <button class="building-btn" data-building="rice_cooker">
-        <span class="b-icon">🍚</span>
-        <span>Rice Cooker</span>
-        <span class="b-terrain">land</span>
-      </button>
-      <button class="building-btn" data-building="nigiri_press">
-        <span class="b-icon">🍣</span>
-        <span>Nigiri Press</span>
-        <span class="b-terrain">land</span>
-      </button>
-      <button class="building-btn" data-building="sushi_shop">
-        <span class="b-icon">🏬</span>
-        <span>Sushi Shop</span>
-        <span class="b-terrain">land</span>
-      </button>
-      <button class="building-btn" data-building="splitter">
-        <span class="b-icon">🔀</span>
-        <span>Splitter</span>
-        <span class="b-terrain">land</span>
-      </button>
-      <button class="building-btn" data-building="merger">
-        <span class="b-icon">🔄</span>
-        <span>Merger</span>
-        <span class="b-terrain">land</span>
-      </button>
-      <button class="building-btn" data-building="tunnel">
-        <span class="b-icon">🕳️</span>
-        <span>Tunnel</span>
-        <span class="b-terrain">land</span>
-      </button>
-    </div>
-
-    <!-- Shop panel (right side) -->
-    <div id="shop-panel">
-      <div class="shop-header">Shop</div>
-      <div id="shop-buildings" class="shop-section">
-        <div class="shop-section-title">Buildings</div>
+    <!-- Bottom HUD Bar -->
+    <div id="hud-bar">
+      <!-- Minimap -->
+      <div id="minimap-section">
+        <canvas id="minimap-canvas" width="172" height="129"></canvas>
       </div>
-      <div id="shop-upgrades" class="shop-section">
-        <div class="shop-section-title">Upgrades</div>
+
+      <!-- Center: Stats + Shop -->
+      <div id="center-panel">
+        <div id="stats-row">
+          <div class="stat">
+            <span class="stat-label">Funds</span>
+            <span class="stat-value" id="stat-funds">$0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Income</span>
+            <span class="stat-value income" id="stat-income">$0.0/min</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Sold</span>
+            <span class="stat-value" id="stat-sold">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Earned</span>
+            <span class="stat-value" id="stat-earned">$0</span>
+          </div>
+        </div>
+        <div id="shop-scroll"></div>
+      </div>
+
+      <!-- Right: Tools + Building Picker -->
+      <div id="action-panel">
+        <div id="tool-row">
+          <button class="tool-btn active" data-tool="place_building">
+            <span class="icon">🏠</span><span>Build</span><span class="hotkey">B</span>
+          </button>
+          <button class="tool-btn" id="rotate-btn" data-action="rotate">
+            <span class="icon" id="rotate-icon">⬆️</span><span>Rotate</span><span class="hotkey">R</span>
+          </button>
+          <button class="tool-btn" data-tool="place_belt">
+            <span class="icon">➡️</span><span>Belt</span><span class="hotkey">B</span>
+          </button>
+          <button class="tool-btn" data-tool="delete">
+            <span class="icon">🗑️</span><span>Delete</span><span class="hotkey">X</span>
+          </button>
+        </div>
+        <div id="building-picker" class="visible">
+          <button class="building-btn active" data-building="fishing_boat"><span class="b-icon">🎣</span><span>Boat</span></button>
+          <button class="building-btn" data-building="fish_market"><span class="b-icon">🏪</span><span>Market</span></button>
+          <button class="building-btn" data-building="cutting_board"><span class="b-icon">🔪</span><span>Cutter</span></button>
+          <button class="building-btn" data-building="rice_paddy"><span class="b-icon">🌾</span><span>Paddy</span></button>
+          <button class="building-btn" data-building="rice_cooker"><span class="b-icon">🍚</span><span>Cooker</span></button>
+          <button class="building-btn" data-building="nigiri_press"><span class="b-icon">🍣</span><span>Press</span></button>
+          <button class="building-btn" data-building="sushi_shop"><span class="b-icon">🏬</span><span>Sushi</span></button>
+          <button class="building-btn" data-building="splitter"><span class="b-icon">🔀</span><span>Split</span></button>
+          <button class="building-btn" data-building="merger"><span class="b-icon">🔄</span><span>Merge</span></button>
+          <button class="building-btn" data-building="tunnel"><span class="b-icon">🕳️</span><span>Tunnel</span></button>
+        </div>
       </div>
     </div>
 
