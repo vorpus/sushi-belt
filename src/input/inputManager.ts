@@ -19,31 +19,46 @@ import type { Toolbar } from './toolbar.ts';
 
 /**
  * Compute an L-shaped path of grid positions from start to end.
- * Goes horizontal first, then vertical.
+ * When verticalFirst is false (default), goes horizontal then vertical.
+ * When verticalFirst is true, goes vertical then horizontal.
  * Returns array of { pos, direction } for each step.
  */
 export function computeBeltPath(
   start: GridPosition,
   end: GridPosition,
+  verticalFirst = false,
 ): { pos: GridPosition; direction: Direction }[] {
   const path: { pos: GridPosition; direction: Direction }[] = [];
   let cx = start.x;
   let cy = start.y;
 
-  // Horizontal leg
   const dx = end.x > start.x ? 1 : -1;
   const hDir: Direction = dx > 0 ? 'east' : 'west';
-  while (cx !== end.x) {
-    path.push({ pos: { x: cx, y: cy }, direction: hDir });
-    cx += dx;
-  }
-
-  // Vertical leg
   const dy = end.y > start.y ? 1 : -1;
   const vDir: Direction = dy > 0 ? 'south' : 'north';
-  while (cy !== end.y) {
-    path.push({ pos: { x: cx, y: cy }, direction: vDir });
-    cy += dy;
+
+  if (verticalFirst) {
+    // Vertical leg first
+    while (cy !== end.y) {
+      path.push({ pos: { x: cx, y: cy }, direction: vDir });
+      cy += dy;
+    }
+    // Horizontal leg second
+    while (cx !== end.x) {
+      path.push({ pos: { x: cx, y: cy }, direction: hDir });
+      cx += dx;
+    }
+  } else {
+    // Horizontal leg first
+    while (cx !== end.x) {
+      path.push({ pos: { x: cx, y: cy }, direction: hDir });
+      cx += dx;
+    }
+    // Vertical leg second
+    while (cy !== end.y) {
+      path.push({ pos: { x: cx, y: cy }, direction: vDir });
+      cy += dy;
+    }
   }
 
   // Final tile — direction matches last movement
@@ -56,6 +71,9 @@ export function computeBeltPath(
 
   return path;
 }
+
+/** Map rotation index (0-3) to belt direction. */
+const ROTATION_TO_DIRECTION: Direction[] = ['north', 'east', 'south', 'west'];
 
 export class InputManager {
   /** Current grid coordinates under the mouse (null if off-grid). */
@@ -72,6 +90,8 @@ export class InputManager {
   /** Belt drag state */
   private beltDragStart: GridPosition | null = null;
   private dragging = false;
+  /** Whether the pointer moved enough to count as a drag vs a click. */
+  private dragMoved = false;
 
   constructor(
     viewport: Viewport,
@@ -178,6 +198,23 @@ export class InputManager {
       this.updatePreview();
       this.toolbar?.syncUI();
     } else if (e.key === 'r' || e.key === 'R') {
+      // In belt mode, R over an existing belt rotates that belt tile
+      if (
+        this.toolState.activeTool === 'place_belt' &&
+        this.gridX !== null &&
+        this.gridY !== null
+      ) {
+        const pos = { x: this.gridX, y: this.gridY };
+        const existing = getBeltTile(this.state, pos);
+        if (existing) {
+          const nextDir = rotateDirectionCW(existing.direction, 1);
+          setBeltTile(this.state, pos, nextDir);
+          rebuildSegments(this.state);
+          this.renderer.gridRenderer.markDirty();
+          this.updatePreview();
+          return;
+        }
+      }
       this.toolState.rotation = (this.toolState.rotation + 1) % 4;
       this.updatePreview();
       this.toolbar?.syncUI();
@@ -198,6 +235,13 @@ export class InputManager {
     } else {
       this.gridX = null;
       this.gridY = null;
+    }
+
+    // Detect drag movement
+    if (this.dragging && this.beltDragStart && pos) {
+      if (pos.x !== this.beltDragStart.x || pos.y !== this.beltDragStart.y) {
+        this.dragMoved = true;
+      }
     }
 
     this.updatePreview();
@@ -234,6 +278,7 @@ export class InputManager {
     } else if (this.toolState.activeTool === 'place_belt') {
       this.beltDragStart = pos;
       this.dragging = true;
+      this.dragMoved = false;
     } else if (this.toolState.activeTool === 'delete') {
       this.handleDelete(pos);
     }
@@ -245,12 +290,30 @@ export class InputManager {
     if (this.toolState.activeTool === 'place_belt' && this.dragging && this.beltDragStart) {
       const pos = this.screenToGrid(e.globalX, e.globalY);
       if (pos) {
-        this.placeBeltPath(this.beltDragStart, pos);
+        if (this.dragMoved) {
+          // Dragged — place L-shaped path
+          this.placeBeltPath(this.beltDragStart, pos);
+        } else {
+          // Single click — place one belt tile with current rotation direction
+          this.placeSingleBelt(pos);
+        }
       }
       this.beltDragStart = null;
       this.dragging = false;
+      this.dragMoved = false;
       this.updatePreview();
     }
+  }
+
+  private placeSingleBelt(pos: GridPosition): void {
+    const cell = this.state.grid[pos.y]?.[pos.x];
+    if (!cell || cell.entityId !== null) return;
+
+    const direction = ROTATION_TO_DIRECTION[this.toolState.rotation];
+    setBeltTile(this.state, pos, direction);
+    this.events.emit('beltPlaced', { position: pos, direction });
+    rebuildSegments(this.state);
+    this.renderer.gridRenderer.markDirty();
   }
 
   private placeBeltPath(start: GridPosition, end: GridPosition): void {
@@ -340,15 +403,19 @@ export class InputManager {
       this.gridX !== null &&
       this.gridY !== null
     ) {
-      // Show belt path preview while dragging, or single-tile highlight otherwise
+      // Show belt path preview while dragging, or single directional tile otherwise
       this.renderer.gridRenderer.renderGhost(null, null, 0, 0, false);
-      if (this.dragging && this.beltDragStart) {
+      if (this.dragging && this.dragMoved && this.beltDragStart) {
         const path = computeBeltPath(this.beltDragStart, { x: this.gridX, y: this.gridY });
         this.renderer.gridRenderer.renderBeltPreview(path);
         this.renderer.gridRenderer.renderHighlight(null, null);
       } else {
-        this.renderer.gridRenderer.renderBeltPreview(null);
-        this.renderer.gridRenderer.renderHighlight(this.gridX, this.gridY);
+        // Show single belt tile preview with current rotation direction
+        const previewDir = ROTATION_TO_DIRECTION[this.toolState.rotation];
+        this.renderer.gridRenderer.renderBeltPreview([
+          { pos: { x: this.gridX, y: this.gridY }, direction: previewDir },
+        ]);
+        this.renderer.gridRenderer.renderHighlight(null, null);
       }
     } else if (
       this.toolState.activeTool === 'delete' &&
